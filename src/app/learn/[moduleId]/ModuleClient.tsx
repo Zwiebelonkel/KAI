@@ -104,7 +104,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
                     PlaceHolderImages[0];
 
   return (
-    <div className="min-h-screen pt-24 pb-20 overflow-x-hidden" ref={containerRef}>
+    <div className="min-h-screen pt-20 pb-20 overflow-x-hidden" ref={containerRef}>
       <div className="mesh-bg" />
       <Header />
       
@@ -118,24 +118,24 @@ export function ModuleClient({ module }: ModuleClientProps) {
         <Button 
           variant="ghost" 
           onClick={() => router.push('/')} 
-          className="mb-12 hover:bg-white/5 -ml-4 rounded-full group animate-reveal"
+          className="mb-8 md:mb-12 hover:bg-white/5 -ml-2 md:-ml-4 rounded-full group animate-reveal text-sm"
         >
           <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Zurück zum Lernpfad
         </Button>
 
-        <div className="mb-16 animate-reveal">
-          <div className="flex items-center gap-4 mb-6">
-             <h1 className="text-5xl md:text-7xl font-black tracking-tighter">{module.title}</h1>
+        <div className="mb-10 md:mb-16 animate-reveal">
+          <div className="flex flex-wrap items-center gap-4 mb-4 md:mb-6">
+             <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-tight">{module.title}</h1>
              {isQuizDone && (
                <div className="bg-green-500/20 p-2 rounded-full border border-green-500/30">
-                 <CheckCircle className="w-10 h-10 text-green-500 animate-in zoom-in spin-in-12 duration-700" />
+                 <CheckCircle className="w-6 h-6 md:w-10 md:h-10 text-green-500 animate-in zoom-in spin-in-12 duration-700" />
                </div>
              )}
           </div>
-          <p className="text-2xl text-muted-foreground leading-relaxed font-medium max-w-3xl">{module.description}</p>
+          <p className="text-lg md:text-2xl text-muted-foreground leading-relaxed font-medium max-w-3xl">{module.description}</p>
         </div>
 
-        <div className="relative aspect-video rounded-[2.5rem] overflow-hidden mb-16 glass-card border-white/10 group hero-visual hero-visual shadow-primary/10 shadow-2xl">
+        <div className="relative aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden mb-12 md:mb-16 glass-card border-white/10 group hero-visual shadow-primary/10 shadow-2xl">
           <Image 
             src={heroImage.imageUrl} 
             alt={heroImage.description} 
@@ -144,36 +144,36 @@ export function ModuleClient({ module }: ModuleClientProps) {
             data-ai-hint={heroImage.imageHint}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent flex items-center justify-center">
-            <Button size="icon" className="w-24 h-24 rounded-full neon-shadow hover:scale-110 transition-transform bg-primary text-white border-0">
-              <PlayCircle className="w-12 h-12 fill-white" />
+            <Button size="icon" className="w-16 h-16 md:w-24 md:h-24 rounded-full neon-shadow hover:scale-110 transition-transform bg-primary text-white border-0">
+              <PlayCircle className="w-8 h-8 md:w-12 md:h-12 fill-white" />
             </Button>
           </div>
         </div>
 
-        <article className="max-w-none mb-24 space-y-20">
-          <div className="animate-reveal p-8 md:p-12 rounded-[2.5rem] premium-gradient border border-white/5 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform duration-700">
+        <article className="max-w-none mb-16 md:mb-24 space-y-12 md:space-y-20">
+          <div className="animate-reveal p-6 md:p-12 rounded-2xl md:rounded-[2.5rem] premium-gradient border border-white/5 flex flex-col md:flex-row gap-6 md:gap-8 items-start relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform duration-700 hidden md:block">
                <Sparkles className="w-32 h-32 text-primary" />
             </div>
-            <div className="bg-primary/20 p-4 rounded-2xl relative z-10 neon-shadow animate-float">
-               <Lightbulb className="w-10 h-10 text-primary" />
+            <div className="bg-primary/20 p-3 md:p-4 rounded-xl md:rounded-2xl relative z-10 neon-shadow animate-float">
+               <Lightbulb className="w-6 h-6 md:w-10 md:h-10 text-primary" />
             </div>
             <div className="relative z-10">
-              <p className="text-2xl md:text-3xl font-bold italic leading-snug tracking-tight text-white/90">
+              <p className="text-xl md:text-3xl font-bold italic leading-snug tracking-tight text-white/90">
                 "{module.content}"
               </p>
             </div>
           </div>
           
           <div className="animate-reveal">
-            <h2 className="text-3xl font-black mb-8 flex items-center gap-4 tracking-tight">
-              <div className="bg-secondary/20 p-3 rounded-2xl text-secondary violet-shadow">
-                <BookOpen className="w-8 h-8" /> 
+            <h2 className="text-2xl md:text-3xl font-black mb-6 md:mb-8 flex items-center gap-3 md:gap-4 tracking-tight">
+              <div className="bg-secondary/20 p-2 md:p-3 rounded-xl md:rounded-2xl text-secondary violet-shadow">
+                <BookOpen className="w-6 h-6 md:w-8 md:h-8" /> 
               </div>
               Glossar: Fachbegriffe
             </h2>
-            <p className="text-lg text-muted-foreground mb-8 font-medium">Öffne die Begriffe, um sie tiefgreifend zu verstehen und deinen Fortschritt zu sichern.</p>
-            <div className="grid gap-4">
+            <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 font-medium">Öffne die Begriffe, um sie tiefgreifend zu verstehen.</p>
+            <div className="grid gap-3 md:gap-4">
               {module.glossary.map((item, idx) => (
                 <GlossaryCard 
                   key={idx} 
@@ -187,7 +187,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
           </div>
         </article>
 
-        <section id="quiz" className="animate-reveal scroll-mt-32">
+        <section id="quiz" className="animate-reveal scroll-mt-24">
           <Quiz 
             questions={module.quiz} 
             onComplete={handleQuizComplete} 
@@ -195,13 +195,13 @@ export function ModuleClient({ module }: ModuleClientProps) {
         </section>
 
         {isQuizDone && (
-          <div className="mt-20 text-center animate-in fade-in slide-in-from-bottom-5 duration-700">
+          <div className="mt-12 md:mt-20 text-center animate-in fade-in slide-in-from-bottom-5 duration-700">
             <Button 
               size="lg" 
               onClick={() => router.push('/')} 
-              className="rounded-full px-16 h-16 text-xl font-bold neon-shadow group"
+              className="w-full sm:w-auto rounded-full px-12 md:px-16 h-14 md:h-16 text-lg md:text-xl font-bold neon-shadow group"
             >
-              Lektion abschließen <ArrowLeft className="ml-4 w-6 h-6 rotate-180 group-hover:translate-x-2 transition-transform" />
+              Lektion abschließen <ArrowLeft className="ml-4 w-5 h-5 md:w-6 md:h-6 rotate-180 group-hover:translate-x-2 transition-transform" />
             </Button>
           </div>
         )}

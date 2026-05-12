@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -46,18 +47,18 @@ export function Quiz({ questions, onComplete }: QuizProps) {
 
   if (isFinished) {
     return (
-      <div className="text-center p-12 glass-card rounded-3xl animate-fade-in border-secondary/30">
+      <div className="text-center p-8 md:p-12 glass-card rounded-2xl md:rounded-3xl animate-fade-in border-secondary/30">
         <div className="mb-6 flex justify-center">
-          <div className="bg-secondary/20 p-4 rounded-full violet-shadow">
-            <Trophy className="w-12 h-12 text-secondary" />
+          <div className="bg-secondary/20 p-3 md:p-4 rounded-full violet-shadow">
+            <Trophy className="w-8 h-8 md:w-12 md:h-12 text-secondary" />
           </div>
         </div>
-        <h3 className="text-3xl font-bold mb-2">Modul gemeistert!</h3>
-        <p className="text-muted-foreground text-lg mb-8">
+        <h3 className="text-2xl md:text-3xl font-bold mb-2">Modul gemeistert!</h3>
+        <p className="text-muted-foreground text-base md:text-lg mb-8">
           Du hast {score} von {questions.length} Fragen richtig beantwortet.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button onClick={() => window.location.reload()} variant="outline" className="gap-2 rounded-full px-8">
+          <Button onClick={() => window.location.reload()} variant="outline" className="w-full sm:w-auto gap-2 rounded-full px-8">
             <RefreshCcw className="w-4 h-4" /> Quiz wiederholen
           </Button>
         </div>
@@ -66,18 +67,18 @@ export function Quiz({ questions, onComplete }: QuizProps) {
   }
 
   return (
-    <div className="glass-card p-8 rounded-3xl border-primary/20 animate-fade-in shadow-xl">
-      <div className="flex justify-between items-center mb-8">
+    <div className="glass-card p-6 md:p-8 rounded-2xl md:rounded-3xl border-primary/20 animate-fade-in shadow-xl">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6 md:mb-8">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-sm font-bold text-primary uppercase tracking-widest">Wissenscheck</span>
+          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-[10px] md:text-sm font-bold text-primary uppercase tracking-widest">Wissenscheck</span>
         </div>
-        <span className="text-sm font-medium text-muted-foreground">Frage {currentIndex + 1} von {questions.length}</span>
+        <span className="text-[10px] md:text-sm font-medium text-muted-foreground">Frage {currentIndex + 1} von {questions.length}</span>
       </div>
 
-      <h3 className="text-2xl font-bold mb-8 leading-snug">{currentQuestion.question}</h3>
+      <h3 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 leading-snug">{currentQuestion.question}</h3>
 
-      <div className="space-y-4 mb-10">
+      <div className="space-y-3 md:space-y-4 mb-8 md:mb-10">
         {currentQuestion.options.map((option, idx) => {
           let optionStyles = "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20";
           
@@ -99,25 +100,25 @@ export function Quiz({ questions, onComplete }: QuizProps) {
               onClick={() => handleOptionClick(idx)}
               disabled={showFeedback}
               className={cn(
-                "w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 flex items-center justify-between group",
+                "w-full text-left p-4 md:p-5 rounded-xl md:rounded-2xl border-2 transition-all duration-300 flex items-center justify-between group",
                 optionStyles
               )}
             >
-              <span className="font-medium text-lg">{option}</span>
-              {showFeedback && idx === currentQuestion.correctIndex && <CheckCircle2 className="w-6 h-6" />}
-              {showFeedback && idx === selectedOption && idx !== currentQuestion.correctIndex && <XCircle className="w-6 h-6" />}
+              <span className="font-medium text-base md:text-lg">{option}</span>
+              {showFeedback && idx === currentQuestion.correctIndex && <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" />}
+              {showFeedback && idx === selectedOption && idx !== currentQuestion.correctIndex && <XCircle className="w-5 h-5 md:w-6 md:h-6" />}
             </button>
           );
         })}
       </div>
 
       {showFeedback && (
-        <div className="mb-10 p-6 bg-primary/5 border border-primary/10 rounded-2xl animate-fade-in">
+        <div className="mb-8 md:mb-10 p-5 md:p-6 bg-primary/5 border border-primary/10 rounded-xl md:rounded-2xl animate-fade-in">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-            <p className="text-sm text-primary font-bold uppercase tracking-wider">Erklärung</p>
+            <p className="text-[10px] md:text-sm text-primary font-bold uppercase tracking-wider">Erklärung</p>
           </div>
-          <p className="text-muted-foreground leading-relaxed">{currentQuestion.explanation}</p>
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{currentQuestion.explanation}</p>
         </div>
       )}
 
@@ -126,12 +127,12 @@ export function Quiz({ questions, onComplete }: QuizProps) {
           <Button 
             onClick={handleCheckAnswer} 
             disabled={selectedOption === null}
-            className="neon-shadow px-12 h-12 rounded-full text-lg"
+            className="w-full sm:w-auto neon-shadow px-12 h-12 rounded-full text-base md:text-lg"
           >
             Antwort prüfen
           </Button>
         ) : (
-          <Button onClick={handleNext} className="gap-2 px-12 h-12 rounded-full text-lg group">
+          <Button onClick={handleNext} className="w-full sm:w-auto gap-2 px-12 h-12 rounded-full text-base md:text-lg group">
             {currentIndex + 1 < questions.length ? "Nächste Frage" : "Lektion beenden"} 
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>

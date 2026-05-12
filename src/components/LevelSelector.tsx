@@ -39,29 +39,29 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 animate-fade-in">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Willkommen bei KAI</h1>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Wähle dein aktuelles Wissensniveau aus, damit wir deinen Lernpfad maßschneidern können.
+    <div className="max-w-4xl mx-auto py-8 md:py-12 px-4 animate-fade-in">
+      <div className="text-center mb-8 md:mb-12">
+        <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tighter">Willkommen bei KAI</h1>
+        <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto font-medium">
+          Wähle dein Wissensniveau aus, damit wir deinen Lernpfad maßschneidern können.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
         {options.map((opt) => (
           <button
             key={opt.id}
             onClick={() => setSelected(opt.id)}
             className={cn(
-              "p-8 rounded-2xl glass-card text-left transition-all duration-300 group hover:-translate-y-1 border-2",
+              "p-6 md:p-8 rounded-2xl glass-card text-left transition-all duration-300 group hover:-translate-y-1 border-2",
               selected === opt.id ? "border-primary violet-shadow" : "border-transparent"
             )}
           >
-            <div className={cn("mb-6 bg-white/5 p-3 rounded-xl w-fit group-hover:scale-110 transition-transform", opt.color)}>
+            <div className={cn("mb-4 md:mb-6 bg-white/5 p-3 rounded-xl w-fit group-hover:scale-110 transition-transform", opt.color)}>
               {opt.icon}
             </div>
-            <h3 className="text-xl font-bold mb-2">{opt.title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{opt.desc}</p>
+            <h3 className="text-lg md:text-xl font-bold mb-2">{opt.title}</h3>
+            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed font-medium">{opt.desc}</p>
           </button>
         ))}
       </div>
@@ -71,7 +71,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
           size="lg" 
           disabled={!selected} 
           onClick={() => selected && onSelect(selected)}
-          className="px-12 h-14 text-lg rounded-full neon-shadow"
+          className="w-full sm:w-auto px-12 h-14 text-lg rounded-full neon-shadow font-bold"
         >
           Lernpfad starten <ArrowRight className="ml-2 w-5 h-5" />
         </Button>
