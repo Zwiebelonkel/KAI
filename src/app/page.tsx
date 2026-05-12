@@ -62,7 +62,7 @@ export default function Home() {
   };
 
   const resetLevel = () => {
-    const reset = {
+    const reset: UserProgress = {
       level: null,
       completedModules: [],
       quizScores: {},
