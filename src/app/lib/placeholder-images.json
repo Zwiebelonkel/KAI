@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "regression-hero",
+      "description": "Abstract visualization of a linear regression line through data points",
+      "imageUrl": "https://picsum.photos/seed/kai1/800/400",
+      "imageHint": "linear regression"
+    },
+    {
+      "id": "classification-hero",
+      "description": "Abstract shapes being sorted into distinct groups representing classification",
+      "imageUrl": "https://picsum.photos/seed/kai2/800/400",
+      "imageHint": "data classification"
+    },
+    {
+      "id": "neural-network-hero",
+      "description": "Visual representation of interconnected nodes in a neural network",
+      "imageUrl": "https://picsum.photos/seed/kai3/800/400",
+      "imageHint": "neural networks"
+    },
+    {
+      "id": "misinformation-hero",
+      "description": "Concept of identifying true vs false data in a digital landscape",
+      "imageUrl": "https://picsum.photos/seed/kai4/800/400",
+      "imageHint": "digital misinformation"
+    }
+  ]
+}
