@@ -8,7 +8,7 @@ import { DifficultyLevel, UserProgress } from "@/lib/types"
 import { modules } from "@/lib/course-data"
 import { ModuleCard } from "@/components/ModuleCard"
 import { Button } from "@/components/ui/button"
-import { Trophy, ShieldAlert, Award } from "lucide-react"
+import { Trophy, ShieldAlert, Award, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 export default function Home() {
