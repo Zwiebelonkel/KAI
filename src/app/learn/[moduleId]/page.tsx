@@ -17,9 +17,18 @@ export default function LearnPage() {
   const router = useRouter();
   const module = modules.find(m => m.id === moduleId);
   
-  if (!module) return <div>Modul nicht gefunden</div>;
+  if (!module) return <div className="min-h-screen flex items-center justify-center">Modul nicht gefunden</div>;
 
-  const heroImage = PlaceHolderImages.find(img => img.id === `${module.id.split('-')[0]}-hero`) || PlaceHolderImages[0];
+  // Suche nach dem passenden Bild oder nutze das erste verfügbare als Fallback
+  // Falls die Liste komplett leer ist, nutzen wir ein hartcodiertes Fallback-Objekt
+  const imageId = `${module.id.split('-')[0]}-hero`;
+  const heroImage = PlaceHolderImages.find(img => img.id === imageId) || 
+                    PlaceHolderImages[0] || 
+                    { 
+                      imageUrl: "https://picsum.photos/seed/default/800/400", 
+                      description: "Lernmodul Bild", 
+                      imageHint: "technology" 
+                    };
 
   return (
     <div className="min-h-screen pt-20 pb-20">
@@ -79,8 +88,8 @@ export default function LearnPage() {
           <Quiz 
             questions={module.quiz} 
             onComplete={(score) => {
-              // In a real app, update global progress state
-              console.log(`Quiz completed with score: ${score}`);
+              // In einer echten App würde hier der Fortschritt gespeichert
+              console.log(`Quiz abgeschlossen mit Score: ${score}`);
             }} 
           />
         </section>

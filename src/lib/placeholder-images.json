@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "intro-hero",
+      "description": "Abstrakte Visualisierung von KI und Gehirn-Konnektivität",
+      "imageUrl": "https://picsum.photos/seed/kai0/800/400",
+      "imageHint": "artificial intelligence"
+    },
+    {
+      "id": "regression-hero",
+      "description": "Visualisierung einer linearen Regression durch Datenpunkte",
+      "imageUrl": "https://picsum.photos/seed/kai1/800/400",
+      "imageHint": "linear regression"
+    },
+    {
+      "id": "classification-hero",
+      "description": "Abstrakte Formen, die in Kategorien sortiert werden",
+      "imageUrl": "https://picsum.photos/seed/kai2/800/400",
+      "imageHint": "data classification"
+    },
+    {
+      "id": "neural-hero",
+      "description": "Visuelle Darstellung eines neuronalen Netzes",
+      "imageUrl": "https://picsum.photos/seed/kai3/800/400",
+      "imageHint": "neural networks"
+    },
+    {
+      "id": "misinformation-hero",
+      "description": "Identifizierung von wahren und falschen Daten",
+      "imageUrl": "https://picsum.photos/seed/kai4/800/400",
+      "imageHint": "digital misinformation"
+    }
+  ]
 }
