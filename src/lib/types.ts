@@ -1,6 +1,15 @@
 
 export type DifficultyLevel = 'Einsteiger' | 'Basics' | 'Fortgeschritten';
 
+export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Exotic';
+
+export interface Trophy {
+  id: string;
+  emoji: string;
+  name: string;
+  rarity: Rarity;
+}
+
 export interface QuizQuestion {
   id: string;
   question: string;
@@ -30,4 +39,5 @@ export interface UserProgress {
   completedModules: string[];
   quizScores: Record<string, number>;
   totalProgress: number;
+  trophies: Trophy[];
 }

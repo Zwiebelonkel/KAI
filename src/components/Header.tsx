@@ -2,12 +2,14 @@
 "use client"
 
 import * as React from "react"
-import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2 } from "lucide-react"
+import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 import { UserProgress } from "@/lib/types"
 import { modules } from "@/lib/course-data"
 import { ProgressBar } from "./ProgressBar"
+import { getRarityColor } from "@/lib/lootbox-data"
+import { cn } from "@/lib/utils"
 
 export function Header() {
   const [progress, setProgress] = React.useState<UserProgress | null>(null);
@@ -37,7 +39,7 @@ export function Header() {
                 <span>Mein Lernstand</span>
               </button>
             </SheetTrigger>
-            <SheetContent className="glass-card border-l border-white/10 w-full sm:max-w-md">
+            <SheetContent className="glass-card border-l border-white/10 w-full sm:max-w-md overflow-y-auto">
               <SheetHeader className="mb-8">
                 <SheetTitle className="text-2xl font-bold flex items-center gap-2">
                   <Trophy className="text-secondary w-6 h-6" /> Dein Fortschritt
@@ -48,7 +50,7 @@ export function Header() {
               </SheetHeader>
 
               {progress ? (
-                <div className="space-y-8">
+                <div className="space-y-8 pb-12">
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium text-muted-foreground">Aktuelles Level</span>
@@ -62,7 +64,31 @@ export function Header() {
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-4">Abgeschlossene Lektionen</h4>
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" /> Trophäen-Sammlung
+                    </h4>
+                    {progress.trophies && progress.trophies.length > 0 ? (
+                      <div className="grid grid-cols-4 gap-3">
+                        {progress.trophies.map((t, i) => (
+                          <div key={i} className="aspect-square bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-2xl group relative hover:scale-110 transition-transform cursor-help">
+                            {t.emoji}
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full animate-pulse" style={{ backgroundColor: 'currentColor' }} />
+                            <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-black/90 border border-white/10 rounded-lg text-[10px] whitespace-nowrap z-50 pointer-events-none">
+                              <p className="font-bold">{t.name}</p>
+                              <p className={cn("font-black uppercase tracking-tighter", getRarityColor(t.rarity))}>{t.rarity}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 border-2 border-dashed border-white/5 rounded-2xl">
+                        <p className="text-xs text-muted-foreground">Noch keine Trophäen gesammelt.<br/>Schließe ein Quiz ab!</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-secondary mb-4">Status Lektionen</h4>
                     <div className="space-y-3">
                       {modules.map((m) => {
                         const isDone = progress.completedModules.includes(m.id);

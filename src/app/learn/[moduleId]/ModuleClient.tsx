@@ -1,9 +1,10 @@
+
 "use client"
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/Header"
-import { LearningModule, UserProgress } from "@/lib/types"
+import { LearningModule, UserProgress, Trophy } from "@/lib/types"
 import { GlossaryCard } from "@/components/GlossaryCard"
 import { Quiz } from "@/components/Quiz"
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,7 @@ import { ArrowLeft, BookOpen, Lightbulb, PlayCircle, CheckCircle } from "lucide-
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { ProgressBar } from "@/components/ProgressBar"
+import { LootboxOverlay } from "@/components/LootboxOverlay"
 
 interface ModuleClientProps {
   module: LearningModule;
@@ -20,6 +22,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
   const router = useRouter();
   const [readTerms, setReadTerms] = React.useState<string[]>([]);
   const [isQuizDone, setIsQuizDone] = React.useState(false);
+  const [showLootbox, setShowLootbox] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
 
   // Load state from localStorage on mount
@@ -40,20 +43,33 @@ export function ModuleClient({ module }: ModuleClientProps) {
   };
 
   const handleQuizComplete = (score: number) => {
-    setIsQuizDone(true);
-    
-    // Save to localStorage
     const saved = localStorage.getItem('kai_user_progress');
     let currentProgress: UserProgress = saved 
       ? JSON.parse(saved) 
-      : { level: 'Einsteiger', completedModules: [], quizScores: {}, totalProgress: 0 };
+      : { level: 'Einsteiger', completedModules: [], quizScores: {}, totalProgress: 0, trophies: [] };
     
-    if (!currentProgress.completedModules.includes(module.id)) {
+    const wasAlreadyDone = currentProgress.completedModules.includes(module.id);
+    
+    if (!wasAlreadyDone) {
       currentProgress.completedModules.push(module.id);
+      // Only show lootbox if it's the first time completing this module
+      setShowLootbox(true);
     }
-    currentProgress.quizScores[module.id] = score;
     
+    currentProgress.quizScores[module.id] = score;
     localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
+    setIsQuizDone(true);
+  };
+
+  const handleLootboxClose = (trophy: Trophy) => {
+    const saved = localStorage.getItem('kai_user_progress');
+    if (saved) {
+      const currentProgress: UserProgress = JSON.parse(saved);
+      if (!currentProgress.trophies) currentProgress.trophies = [];
+      currentProgress.trophies.push(trophy);
+      localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
+    }
+    setShowLootbox(false);
   };
 
   // Calculate local page progress
@@ -71,6 +87,8 @@ export function ModuleClient({ module }: ModuleClientProps) {
     <div className="min-h-screen pt-20 pb-20">
       <Header />
       
+      {showLootbox && <LootboxOverlay onClose={handleLootboxClose} />}
+
       <div className="fixed bottom-0 left-0 right-0 z-40 h-1 bg-background">
         <ProgressBar value={progress} className="h-2 rounded-none" />
       </div>
