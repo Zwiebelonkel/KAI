@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -12,15 +11,20 @@ import { ArrowLeft, BookOpen, Lightbulb, PlayCircle } from "lucide-react"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 
+export async function generateStaticParams() {
+  return modules.map((module) => ({
+    moduleId: module.id,
+  }))
+}
+
 export default function LearnPage() {
-  const { moduleId } = useParams();
+  const params = useParams();
+  const moduleId = params?.moduleId as string;
   const router = useRouter();
   const module = modules.find(m => m.id === moduleId);
   
   if (!module) return <div className="min-h-screen flex items-center justify-center">Modul nicht gefunden</div>;
 
-  // Suche nach dem passenden Bild oder nutze das erste verfügbare als Fallback
-  // Falls die Liste komplett leer ist, nutzen wir ein hartcodiertes Fallback-Objekt
   const imageId = `${module.id.split('-')[0]}-hero`;
   const heroImage = PlaceHolderImages.find(img => img.id === imageId) || 
                     PlaceHolderImages[0] || 
@@ -88,7 +92,6 @@ export default function LearnPage() {
           <Quiz 
             questions={module.quiz} 
             onComplete={(score) => {
-              // In einer echten App würde hier der Fortschritt gespeichert
               console.log(`Quiz abgeschlossen mit Score: ${score}`);
             }} 
           />
