@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -12,35 +11,41 @@ import { Trophy, ShieldAlert, Award, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 export default function Home() {
-  const [progress, setProgress] = React.useState<UserProgress>(() => {
-    // In a real app, this would load from a database/localStorage
-    return {
+  const [progress, setProgress] = React.useState<UserProgress>({
+    level: null,
+    completedModules: [],
+    quizScores: {},
+    totalProgress: 0
+  });
+
+  // Load progress from localStorage on mount
+  React.useEffect(() => {
+    const saved = localStorage.getItem('kai_user_progress');
+    if (saved) {
+      setProgress(JSON.parse(saved));
+    }
+  }, []);
+
+  const handleLevelSelect = (level: DifficultyLevel) => {
+    const nextProgress = { ...progress, level };
+    setProgress(nextProgress);
+    localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
+  };
+
+  const resetLevel = () => {
+    const reset = {
       level: null,
       completedModules: [],
       quizScores: {},
       totalProgress: 0
     };
-  });
-
-  const handleLevelSelect = (level: DifficultyLevel) => {
-    setProgress(prev => ({ ...prev, level }));
-  };
-
-  const resetLevel = () => {
-    setProgress({
-      level: null,
-      completedModules: [],
-      quizScores: {},
-      totalProgress: 0
-    });
+    setProgress(reset);
+    localStorage.removeItem('kai_user_progress');
   };
 
   if (!progress.level) {
     return <LevelSelector onSelect={handleLevelSelect} />;
   }
-
-  // Filter modules based on level (simplified: show all but mark some as advanced)
-  const availableModules = modules;
 
   return (
     <div className="min-h-screen pt-20 pb-12">
@@ -73,10 +78,10 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableModules.map((module) => {
+            {modules.map((module) => {
               const isCompleted = progress.completedModules.includes(module.id);
               const isLocked = progress.level === 'Einsteiger' && module.minLevel === 'Fortgeschritten';
-              const moduleProgress = isCompleted ? 100 : 0; // Simplified for demo
+              const moduleProgress = isCompleted ? 100 : 0;
               
               return (
                 <ModuleCard 

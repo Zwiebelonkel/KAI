@@ -1,10 +1,9 @@
-
 "use client"
 
 import * as React from "react"
 import { QuizQuestion } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle, ArrowRight, RefreshCcw } from "lucide-react"
+import { CheckCircle2, XCircle, ArrowRight, RefreshCcw, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface QuizProps {
@@ -39,7 +38,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
       setShowFeedback(false);
     } else {
       setIsFinished(true);
-      onComplete(score + (selectedOption === questions[currentIndex].correctIndex ? 1 : 0));
+      onComplete(score);
     }
   };
 
@@ -47,33 +46,40 @@ export function Quiz({ questions, onComplete }: QuizProps) {
 
   if (isFinished) {
     return (
-      <div className="text-center p-8 glass-card rounded-2xl animate-fade-in">
-        <div className="mb-4 flex justify-center">
-          <CheckCircle2 className="w-16 h-16 text-secondary" />
+      <div className="text-center p-12 glass-card rounded-3xl animate-fade-in border-secondary/30">
+        <div className="mb-6 flex justify-center">
+          <div className="bg-secondary/20 p-4 rounded-full violet-shadow">
+            <Trophy className="w-12 h-12 text-secondary" />
+          </div>
         </div>
-        <h3 className="text-2xl font-bold mb-2">Quiz abgeschlossen!</h3>
-        <p className="text-muted-foreground mb-6">
+        <h3 className="text-3xl font-bold mb-2">Modul gemeistert!</h3>
+        <p className="text-muted-foreground text-lg mb-8">
           Du hast {score} von {questions.length} Fragen richtig beantwortet.
         </p>
-        <Button onClick={() => window.location.reload()} variant="outline" className="gap-2">
-          <RefreshCcw className="w-4 h-4" /> Noch einmal
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button onClick={() => window.location.reload()} variant="outline" className="gap-2 rounded-full px-8">
+            <RefreshCcw className="w-4 h-4" /> Quiz wiederholen
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="glass-card p-6 rounded-2xl border-primary/20 animate-fade-in">
-      <div className="flex justify-between items-center mb-6">
-        <span className="text-sm font-medium text-primary uppercase tracking-wider">Mini-Quiz</span>
-        <span className="text-sm text-muted-foreground">Frage {currentIndex + 1} von {questions.length}</span>
+    <div className="glass-card p-8 rounded-3xl border-primary/20 animate-fade-in shadow-xl">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-sm font-bold text-primary uppercase tracking-widest">Wissenscheck</span>
+        </div>
+        <span className="text-sm font-medium text-muted-foreground">Frage {currentIndex + 1} von {questions.length}</span>
       </div>
 
-      <h3 className="text-xl font-semibold mb-6 leading-tight">{currentQuestion.question}</h3>
+      <h3 className="text-2xl font-bold mb-8 leading-snug">{currentQuestion.question}</h3>
 
-      <div className="space-y-3 mb-8">
+      <div className="space-y-4 mb-10">
         {currentQuestion.options.map((option, idx) => {
-          let optionStyles = "border-white/10 bg-white/5 hover:bg-white/10";
+          let optionStyles = "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20";
           
           if (showFeedback) {
             if (idx === currentQuestion.correctIndex) {
@@ -81,10 +87,10 @@ export function Quiz({ questions, onComplete }: QuizProps) {
             } else if (idx === selectedOption) {
               optionStyles = "border-red-500/50 bg-red-500/10 text-red-400";
             } else {
-              optionStyles = "opacity-50";
+              optionStyles = "opacity-50 grayscale";
             }
           } else if (selectedOption === idx) {
-            optionStyles = "border-primary bg-primary/10 text-primary-foreground";
+            optionStyles = "border-primary bg-primary/10 text-primary ring-2 ring-primary/20";
           }
 
           return (
@@ -93,22 +99,25 @@ export function Quiz({ questions, onComplete }: QuizProps) {
               onClick={() => handleOptionClick(idx)}
               disabled={showFeedback}
               className={cn(
-                "w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-center justify-between",
+                "w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 flex items-center justify-between group",
                 optionStyles
               )}
             >
-              <span>{option}</span>
-              {showFeedback && idx === currentQuestion.correctIndex && <CheckCircle2 className="w-5 h-5" />}
-              {showFeedback && idx === selectedOption && idx !== currentQuestion.correctIndex && <XCircle className="w-5 h-5" />}
+              <span className="font-medium text-lg">{option}</span>
+              {showFeedback && idx === currentQuestion.correctIndex && <CheckCircle2 className="w-6 h-6" />}
+              {showFeedback && idx === selectedOption && idx !== currentQuestion.correctIndex && <XCircle className="w-6 h-6" />}
             </button>
           );
         })}
       </div>
 
       {showFeedback && (
-        <div className="mb-8 p-4 bg-primary/5 border border-primary/10 rounded-xl animate-fade-in">
-          <p className="text-sm text-primary font-semibold mb-1">Erklärung:</p>
-          <p className="text-sm text-muted-foreground">{currentQuestion.explanation}</p>
+        <div className="mb-10 p-6 bg-primary/5 border border-primary/10 rounded-2xl animate-fade-in">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+            <p className="text-sm text-primary font-bold uppercase tracking-wider">Erklärung</p>
+          </div>
+          <p className="text-muted-foreground leading-relaxed">{currentQuestion.explanation}</p>
         </div>
       )}
 
@@ -117,14 +126,14 @@ export function Quiz({ questions, onComplete }: QuizProps) {
           <Button 
             onClick={handleCheckAnswer} 
             disabled={selectedOption === null}
-            className="neon-shadow px-8"
+            className="neon-shadow px-12 h-12 rounded-full text-lg"
           >
-            Überprüfen
+            Antwort prüfen
           </Button>
         ) : (
-          <Button onClick={handleNext} className="gap-2 px-8">
-            {currentIndex + 1 < questions.length ? "Nächste Frage" : "Abschließen"} 
-            <ArrowRight className="w-4 h-4" />
+          <Button onClick={handleNext} className="gap-2 px-12 h-12 rounded-full text-lg group">
+            {currentIndex + 1 < questions.length ? "Nächste Frage" : "Lektion beenden"} 
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
         )}
       </div>
