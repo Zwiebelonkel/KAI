@@ -1,10 +1,24 @@
-
 "use client"
 
 import * as React from "react"
 import { Header } from "@/components/Header"
 import { Button } from "@/components/ui/button"
-import { ShieldAlert, CheckCircle, XCircle, ArrowRight, Trophy, Eye, Volume2, Mail, Image as ImageIcon } from "lucide-react"
+import { 
+  ShieldAlert, 
+  CheckCircle, 
+  XCircle, 
+  ArrowRight, 
+  Trophy, 
+  Eye, 
+  Volume2, 
+  Mail, 
+  Image as ImageIcon,
+  MessageSquare,
+  Globe,
+  DollarSign,
+  FileText,
+  PhoneCall
+} from "lucide-react"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 
@@ -16,48 +30,98 @@ const cases = [
     clues: ["Asynchron", "Metallische Stimme", "Keine Quelle"],
     options: ["Echt", "KI-Manipuliert"],
     correct: 1,
-    explanation: "Hierbei handelt es sich um ein Deepfake. Stimme und Lippen wurden künstlich angepasst.",
+    explanation: "Hierbei handelt es sich um ein Deepfake. Stimme und Lippen wurden künstlich angepasst, um eine absurde Falschmeldung zu verbreiten.",
     icon: <Volume2 className="w-8 h-8 md:w-12 md:h-12 text-primary" />
   },
   {
     id: 2,
     title: "Angebliche CEO-Mail",
-    description: "Du erhältst eine E-Mail deines CEOs mit einer Sprachnachricht. Er bittet dich um eine dringende Überweisung.",
+    description: "Du erhältst eine E-Mail deines CEOs mit einer Sprachnachricht. Er bittet dich um eine dringende Überweisung für ein geheimes Projekt.",
     clues: ["Druck", "Ungewöhnlich", "Verdächtig"],
     options: ["Echt", "Betrugsversuch"],
     correct: 1,
-    explanation: "Social Engineering nutzt KI-Stimmen, um Vertrauen zu erschleichen. Seriöse Firmen tun dies nie.",
+    explanation: "Social Engineering nutzt KI-Stimmen (Voice Cloning), um Vertrauen zu erschleichen. Seriöse Firmen fordern niemals Überweisungen per Sprachnachricht an.",
     icon: <Mail className="w-8 h-8 md:w-12 md:h-12 text-primary" />
   },
   {
     id: 3,
     title: "Perfektes Urlaubsfoto",
-    description: "Ein Influencer postet ein Foto von einem magischen lila Strand auf Bali. Das Wasser leuchtet neonfarben.",
+    description: "Ein Influencer postet ein Foto von einem magischen lila Strand auf Bali. Das Wasser leuchtet neonfarben und der Sand glitzert.",
     clues: ["Unnatürlich", "Verschwommen", "Keine Daten"],
     options: ["Echt", "KI-Generiert"],
     correct: 1,
-    explanation: "KI neigt zu übertriebenen Farben und Fehlern in Texturen wie Wasser oder Sand.",
+    explanation: "KI neigt zu übertriebenen Farben und Fehlern in Texturen wie Wasser oder Sand. Oft fehlen EXIF-Daten (Metadaten) in solchen Bildern.",
     icon: <ImageIcon className="w-8 h-8 md:w-12 md:h-12 text-primary" />
   },
   {
     id: 4,
     title: "Der 'Wunder-Bot'-Chat",
-    description: "Ein Support-Chat antwortet in Lichtgeschwindigkeit, macht aber eigenartige Grammatikfehler.",
+    description: "Ein Support-Chat antwortet in Lichtgeschwindigkeit, macht aber eigenartige Grammatikfehler und wiederholt Phrasen.",
     clues: ["Schnell", "Repetitiv", "Emotionslos"],
     options: ["Mensch", "KI-Bot"],
     correct: 1,
-    explanation: "Bots sind extrem schnell, bleiben aber bei komplexen oder emotionalen Anliegen oft hängen.",
-    icon: <ShieldAlert className="w-8 h-8 md:w-12 md:h-12 text-primary" />
+    explanation: "Bots sind extrem schnell, bleiben aber bei komplexen oder emotionalen Anliegen oft hängen und nutzen repetitive Satzbausteine.",
+    icon: <MessageSquare className="w-8 h-8 md:w-12 md:h-12 text-primary" />
   },
   {
     id: 5,
     title: "Breaking News auf X",
-    description: "Ein Video zeigt eine Explosion vor dem Weißen Haus. Gepostet von einem ganz neuen Account.",
+    description: "Ein Video zeigt eine Explosion vor einem historischen Monument. Gepostet von einem ganz neuen Account ohne Follower.",
     clues: ["Junger Account", "Keine News", "Logikfehler"],
     options: ["Echt", "KI-Desinformation"],
     correct: 1,
-    explanation: "KI-Bilder haben oft architektonische Fehler (z.B. falsche Fensteranzahl).",
+    explanation: "KI-Bilder haben oft architektonische Fehler (z.B. falsche Fensteranzahl) und werden meist über 'Wegwerf-Accounts' gestreut.",
     icon: <Eye className="w-8 h-8 md:w-12 md:h-12 text-primary" />
+  },
+  {
+    id: 6,
+    title: "Der Enkeltrick 2.0",
+    description: "Eine Oma erhält einen Anruf von ihrem Enkel. Die Stimme klingt exakt wie er, aber er verlangt Geld für eine Kaution.",
+    clues: ["Emotionaler Druck", "Voice Cloning", "Geldforderung"],
+    options: ["Echt", "KI-Anruf"],
+    correct: 1,
+    explanation: "KI-Stimmklone können aus nur wenigen Sekunden Originalmaterial erstellt werden. Bei Geldforderungen immer über eine bekannte Nummer zurückrufen!",
+    icon: <PhoneCall className="w-8 h-8 md:w-12 md:h-12 text-primary" />
+  },
+  {
+    id: 7,
+    title: "Übertriebene Rezensionen",
+    description: "Ein neues Produkt hat 500 Fünf-Sterne-Bewertungen innerhalb von 2 Stunden erhalten. Alle Texte klingen sehr ähnlich.",
+    clues: ["Zu schnell", "Ähnlicher Stil", "Keine Details"],
+    options: ["Echte Kunden", "KI-Bot-Farm"],
+    correct: 1,
+    explanation: "Große Sprachmodelle werden genutzt, um massenhaft Rezensionen zu schreiben. Verdächtig sind fehlende Details und identische Satzstrukturen.",
+    icon: <Globe className="w-8 h-8 md:w-12 md:h-12 text-primary" />
+  },
+  {
+    id: 8,
+    title: "Promi-Investment-Tipp",
+    description: "Ein Video zeigt Elon Musk, wie er eine neue Krypto-Plattform empfiehlt, die 1000% Gewinn garantiert.",
+    clues: ["Unnatürlicher Mund", "Gier-Appell", "Unstimmig"],
+    options: ["Echtes Interview", "Deepfake Scam"],
+    correct: 1,
+    explanation: "Scammer nutzen Deepfakes von Prominenten. Achte auf die Mundbewegungen und darauf, ob das Gesagte zum Ruf der Person passt.",
+    icon: <DollarSign className="w-8 h-8 md:w-12 md:h-12 text-primary" />
+  },
+  {
+    id: 9,
+    title: "Wissenschaftlicher Abstract",
+    description: "Ein Artikel behauptet, dass Bananen gegen Computerviren helfen. Er ist voller Fachbegriffe, Quellen fehlen aber.",
+    clues: ["Keine Belege", "Absurdität", "Fachbegriff-Salat"],
+    options: ["Wissenschaftlich", "KI-Halluzination"],
+    correct: 1,
+    explanation: "KI kann Texte generieren, die fundiert klingen, aber inhaltlich völlig falsch sind (Halluzinationen). Überprüfe immer die Quellenangaben.",
+    icon: <FileText className="w-8 h-8 md:w-12 md:h-12 text-primary" />
+  },
+  {
+    id: 10,
+    title: "E-Mail-Phishing-Check",
+    description: "Eine Mail von 'Paypal' informiert dich über eine Kontosperrung. Der Text ist fehlerfrei, aber die Anrede ist 'Sehr geehrter Kunde'.",
+    clues: ["Vage Anrede", "Druck", "Link-Vorschau"],
+    options: ["Offizielle Mail", "KI-generiertes Phishing"],
+    correct: 1,
+    explanation: "KI hilft Betrügern, fehlerfreie Phishing-Mails zu schreiben. Seriöse Anbieter nutzen jedoch fast immer eine persönliche Anrede.",
+    icon: <ShieldAlert className="w-8 h-8 md:w-12 md:h-12 text-primary" />
   }
 ];
 
@@ -92,10 +156,10 @@ export default function AssessmentPage() {
         <Header />
         <div className="max-w-xl w-full glass-card p-8 md:p-12 rounded-2xl md:rounded-3xl text-center animate-fade-in border-secondary/30">
           <Trophy className="w-16 h-16 md:w-20 md:h-20 text-secondary mx-auto mb-6 violet-shadow rounded-full p-4" />
-          <h2 className="text-3xl md:text-4xl font-black mb-4">Test beendet!</h2>
+          <h2 className="text-3xl md:text-4xl font-black mb-4">Check beendet!</h2>
           <p className="text-lg text-muted-foreground mb-8">
             Du hast {score} von {cases.length} Fällen korrekt beurteilt. 
-            {score === cases.length ? " Wahnsinn! Ein echter Profi." : score >= 3 ? " Gut gemacht!" : " Bleib wachsam."}
+            {score === cases.length ? " Unglaublich! Du bist ein wahrer KI-Detektiv." : score >= 7 ? " Sehr gut! Du hast einen scharfen Blick." : score >= 5 ? " Nicht schlecht, aber bleib wachsam!" : " Vorsicht! Du solltest die Module nochmal wiederholen."}
           </p>
           <Button onClick={() => window.location.href = '/'} size="lg" className="w-full sm:w-auto rounded-full px-12 h-14 font-bold">
             Zurück zum Hauptmenü
@@ -113,10 +177,10 @@ export default function AssessmentPage() {
       <main className="container mx-auto px-4 max-w-4xl">
         <div className="mb-8 md:mb-12 text-center animate-fade-in">
           <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mx-auto mb-4">
-            Transfer-Test: KI im Alltag
+            KI-Kompetenz Check: Praxis-Szenarien
           </div>
-          <h1 className="text-3xl md:text-4xl font-black mb-2 md:mb-4 tracking-tighter">Erkennst du den Schwindel?</h1>
-          <p className="text-muted-foreground text-sm md:text-base font-medium">Szenario {currentCase + 1} von {cases.length}</p>
+          <h1 className="text-3xl md:text-5xl font-black mb-2 md:mb-4 tracking-tighter">Echt oder Fake?</h1>
+          <p className="text-muted-foreground text-sm md:text-lg font-medium">Szenario {currentCase + 1} von {cases.length}</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start mb-12">
@@ -131,44 +195,47 @@ export default function AssessmentPage() {
                 <div className="mb-4 md:mb-6 bg-primary/20 p-3 md:p-4 rounded-xl md:rounded-2xl">
                   {c.icon}
                 </div>
-                <h4 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{c.title}</h4>
-                <p className="text-base md:text-lg font-medium leading-relaxed italic">{c.description}</p>
+                <h4 className="text-lg md:text-2xl font-bold mb-3 md:mb-4">{c.title}</h4>
+                <p className="text-base md:text-xl font-medium leading-relaxed italic text-white/90">{c.description}</p>
              </div>
           </div>
 
           <div className="animate-fade-in delay-200">
-            <h3 className="text-xl md:text-2xl font-black mb-6">Was sagst du?</h3>
+            <h3 className="text-xl md:text-2xl font-black mb-6">Deine Einschätzung?</h3>
             <div className="space-y-3 md:space-y-4 mb-8">
               {c.options.map((opt, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSelect(idx)}
-                  className={`w-full p-4 md:p-5 rounded-xl md:rounded-2xl border-2 text-left transition-all duration-300 flex justify-between items-center
+                  className={`w-full p-4 md:p-6 rounded-xl md:rounded-2xl border-2 text-left transition-all duration-300 flex justify-between items-center
                     ${selected === idx ? (idx === c.correct ? 'border-green-500 bg-green-500/10' : 'border-red-500 bg-red-500/10') : 'border-white/10 bg-white/5 hover:border-primary/50'}
                   `}
                 >
-                  <span className="font-semibold text-base md:text-lg">{opt}</span>
-                  {selected !== null && idx === c.correct && <CheckCircle className="text-green-500 w-5 h-5 md:w-6 md:h-6" />}
-                  {selected === idx && idx !== c.correct && <XCircle className="text-red-500 w-5 h-5 md:w-6 md:h-6" />}
+                  <span className="font-bold text-base md:text-xl">{opt}</span>
+                  {selected !== null && idx === c.correct && <CheckCircle className="text-green-500 w-5 h-5 md:w-8 md:h-8" />}
+                  {selected === idx && idx !== c.correct && <XCircle className="text-red-500 w-5 h-5 md:w-8 md:h-8" />}
                 </button>
               ))}
             </div>
 
             {selected !== null && (
-              <div className="p-5 md:p-6 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl animate-fade-in">
-                <p className="text-[10px] font-bold text-primary mb-2 uppercase tracking-widest">Die Erklärung:</p>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-medium">{c.explanation}</p>
+              <div className="p-6 md:p-8 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl animate-fade-in shadow-2xl">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest">Die Auflösung</p>
+                </div>
+                <p className="text-sm md:text-lg text-muted-foreground leading-relaxed font-medium mb-6">{c.explanation}</p>
                 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {c.clues.map((clue, i) => (
-                    <span key={i} className="text-[9px] bg-white/10 px-2 py-1 rounded-md text-muted-foreground uppercase tracking-tight font-bold">
+                    <span key={i} className="text-[9px] md:text-[10px] bg-white/10 px-3 py-1.5 rounded-full text-muted-foreground uppercase tracking-tight font-black border border-white/5">
                       {clue}
                     </span>
                   ))}
                 </div>
 
-                <Button onClick={next} className="mt-6 w-full gap-2 rounded-xl h-12 font-bold">
-                  {currentCase + 1 < cases.length ? "Nächstes Szenario" : "Ergebnis anzeigen"} <ArrowRight className="w-4 h-4" />
+                <Button onClick={next} className="mt-8 w-full gap-2 rounded-xl h-14 md:h-16 font-bold text-lg neon-shadow">
+                  {currentCase + 1 < cases.length ? "Nächstes Szenario" : "Ergebnis anzeigen"} <ArrowRight className="w-5 h-5" />
                 </Button>
               </div>
             )}
