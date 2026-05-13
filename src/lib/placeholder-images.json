@@ -7,6 +7,12 @@
       "imageHint": "artificial intelligence"
     },
     {
+      "id": "ai-hero",
+      "description": "Abstrakte Visualisierung von KI und Gehirn-Konnektivität",
+      "imageUrl": "https://picsum.photos/seed/kai0/800/400",
+      "imageHint": "artificial intelligence"
+    },
+    {
       "id": "regression-hero",
       "description": "Visualisierung einer linearen Regression durch Datenpunkte",
       "imageUrl": "https://picsum.photos/seed/kai1/800/400",

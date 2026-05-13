@@ -8,7 +8,7 @@ export const modules: LearningModule[] = [
     description: 'Eine Einführung in die Welt der künstlichen Intelligenz ohne Fachchinesisch.',
     icon: 'Sparkles',
     minLevel: 'Einsteiger',
-    content: 'Künstliche Intelligenz ist nicht ein einzelnes Programm, sondern ein Überbegriff für Technologien, die Maschinen befähigen, Aufgaben auszuführen, die normalerweise menschliche Intelligenz erfordern. Das reicht von der einfachen Sortierung von E-Mails bis hin zum autonomen Fahren.',
+    content: 'Künstliche Intelligenz ist nicht ein einzelnes Programm, sondern ein Überbegriff für Technologien, die Maschinen befähigen, Aufgaben auszuführen, die normalerweise menschliche Intelligenz auffordern. Das reicht von der einfachen Sortierung von E-Mails bis hin zum autonomen Fahren.',
     glossary: [
       { term: 'Algorithmus', definition: 'Eine präzise Handlungsanweisung, um ein Problem zu lösen – wie ein Kochrezept für den Computer.' },
       { term: 'Turing-Test', definition: 'Ein Experiment, um festzustellen, ob eine Maschine ein dem Menschen gleichwertiges Denkvermögen besitzt.' },
@@ -50,6 +50,75 @@ export const modules: LearningModule[] = [
         ],
         correctIndex: 2,
         explanation: 'Ein Algorithmus ist wie ein Kochrezept: Eine Abfolge von Schritten, die zum Ziel führt.'
+      }
+    ]
+  },
+  {
+    id: 'ai-image-fake-news',
+    title: 'KI-Bilder & Fake News erkennen',
+    description: 'Wie du manipulierte Bilder, KI-generierte Inhalte und falsche Nachrichten besser einschätzen kannst.',
+    icon: 'ShieldAlert',
+    minLevel: 'Einsteiger',
+    content: 'KI-generierte Bilder und Fake News können sehr überzeugend wirken. Deshalb ist es wichtig, Inhalte nicht sofort zu glauben, sondern bewusst zu prüfen. Achte auf unlogische Details im Bild, merkwürdige Hände, falsche Schatten, verzerrte Schrift oder unrealistische Szenen. Bei Nachrichten solltest du immer prüfen, wer die Quelle ist, ob andere seriöse Medien darüber berichten und ob das Bild wirklich zum Ereignis passt.',
+    glossary: [
+      { term: 'KI-generiertes Bild', definition: 'Ein Bild, das ganz oder teilweise von künstlicher Intelligenz erstellt wurde.' },
+      { term: 'Fake News', definition: 'Falsche oder irreführende Informationen, die wie echte Nachrichten wirken sollen.' },
+      { term: 'Quelle', definition: 'Der Ursprung einer Information, zum Beispiel eine Webseite, Zeitung oder Person.' },
+      { term: 'Bildmanipulation', definition: 'Eine nachträgliche Veränderung eines Bildes, um etwas anders darzustellen als es wirklich war.' },
+      { term: 'Reverse Image Search', definition: 'Eine Rückwärtssuche mit einem Bild, um herauszufinden, wo es bereits im Internet verwendet wurde.' }
+    ],
+    quiz: [
+      {
+        id: 'q1-image-fake',
+        question: 'Handelt es sich bei diesem Porträt um ein echtes Foto oder eine KI-Generierung? Achte auf den Hintergrund und die Details an den Haaren.',
+        imageUrl: 'https://picsum.photos/seed/kai6/600/400',
+        options: ['Echtes Foto', 'KI-Generiert'],
+        correctIndex: 1,
+        explanation: 'KI-Bilder können besonders bei komplexen Details wie feinen Haarsträhnen oder dem Verschmelzen von Vorder- und Hintergrund Fehler machen.',
+      },
+      {
+        id: 'q2-image-fake',
+        question: 'Diese Landschaft wirkt perfekt. Aber ist sie auch real? Checke die Spiegelungen im Wasser.',
+        imageUrl: 'https://picsum.photos/seed/kai7/600/400',
+        options: ['Echt', 'KI-Fälschung'],
+        correctIndex: 1,
+        explanation: 'Physikalische Unkorrektheiten in Spiegelungen oder Schatten sind klassische Warnsignale für KI-Inhalte.',
+      },
+      {
+        id: 'q3-image-fake',
+        question: 'Was ist ein typisches Warnsignal bei KI-generierten Bildern?',
+        options: [
+          'Das Bild ist bunt',
+          'Unlogische Details wie falsche Hände oder verzerrte Schrift',
+          'Das Bild hat eine hohe Auflösung',
+          'Das Bild wurde auf einem Handy angesehen'
+        ],
+        correctIndex: 1,
+        explanation: 'KI-Modelle haben oft Schwierigkeiten mit anatomischen Details wie Fingern oder der logischen Struktur von Text innerhalb von Bildern.'
+      },
+      {
+        id: 'q4-image-fake',
+        question: 'Was solltest du tun, bevor du eine schockierende Nachricht weiterleitest?',
+        options: [
+          'Sofort teilen',
+          'Nur die Überschrift lesen',
+          'Quelle prüfen und schauen, ob andere seriöse Medien darüber berichten',
+          'Dem Bild automatisch glauben'
+        ],
+        correctIndex: 2,
+        explanation: 'Emotionale oder schockierende Inhalte werden oft zur Manipulation genutzt. Ein Quellencheck ist unerlässlich.'
+      },
+      {
+        id: 'q5-image-fake',
+        question: 'Was bedeutet Reverse Image Search?',
+        options: [
+          'Ein Bild abdunkeln',
+          'Ein Bild rückwärts abspielen',
+          'Mit einem Bild suchen, wo es bereits online vorkommt',
+          'Ein Bild löschen'
+        ],
+        correctIndex: 2,
+        explanation: 'Die Rückwärtssuche hilft zu erkennen, ob ein Bild in einem völlig falschen oder veralteten Kontext verwendet wird.'
       }
     ]
   },

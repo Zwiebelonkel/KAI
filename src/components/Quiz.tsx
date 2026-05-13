@@ -4,7 +4,8 @@
 import * as React from "react"
 import { QuizQuestion } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle, ArrowRight, RefreshCcw, Trophy } from "lucide-react"
+import { CheckCircle2, XCircle, ArrowRight, RefreshCcw, Trophy, Image as ImageIcon } from "lucide-react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 interface QuizProps {
@@ -78,6 +79,17 @@ export function Quiz({ questions, onComplete }: QuizProps) {
 
       <h3 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 leading-snug">{currentQuestion.question}</h3>
 
+      {currentQuestion.imageUrl && (
+        <div className="relative aspect-video rounded-xl overflow-hidden mb-8 border border-white/10 glass-card">
+          <Image 
+            src={currentQuestion.imageUrl} 
+            alt="Quiz Illustration" 
+            fill 
+            className="object-cover"
+          />
+        </div>
+      )}
+
       <div className="space-y-3 md:space-y-4 mb-8 md:mb-10">
         {currentQuestion.options.map((option, idx) => {
           let optionStyles = "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20";
@@ -116,7 +128,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
         <div className="mb-8 md:mb-10 p-5 md:p-6 bg-primary/5 border border-primary/10 rounded-xl md:rounded-2xl animate-fade-in">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-            <p className="text-[10px] md:text-sm text-primary font-bold uppercase tracking-wider">Erklärung</p>
+            <p className="text-[10px] md:text-sm text-primary font-bold uppercase tracking-wider">Auflösung & Erklärung</p>
           </div>
           <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{currentQuestion.explanation}</p>
         </div>

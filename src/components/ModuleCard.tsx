@@ -3,7 +3,7 @@
 
 import { LearningModule } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { Sparkles, TrendingUp, Grid, Cpu, Lock, CheckCircle2, ArrowUpRight } from "lucide-react"
+import { Sparkles, TrendingUp, Grid, Cpu, Lock, CheckCircle2, ArrowUpRight, ShieldAlert } from "lucide-react"
 import Link from "next/link"
 import { ProgressBar } from "./ProgressBar"
 
@@ -18,7 +18,8 @@ const iconMap: Record<string, any> = {
   Sparkles,
   TrendingUp,
   Grid,
-  Cpu
+  Cpu,
+  ShieldAlert
 };
 
 export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCardProps) {
