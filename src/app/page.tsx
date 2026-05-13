@@ -77,6 +77,8 @@ export default function Home() {
     return <LevelSelector onSelect={handleLevelSelect} />;
   }
 
+  const isAssessmentUnlocked = progress.completedModules.length >= 2;
+
   return (
     <div className="min-h-screen pt-20 pb-12 overflow-x-hidden" ref={containerRef}>
       <div className="mesh-bg" />
@@ -152,21 +154,31 @@ export default function Home() {
                 <ShieldAlert className="w-8 h-8 md:w-10 md:h-10 text-primary" />
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-5xl font-black mb-4 md:mb-6 tracking-tight">KI-Kompetenz Check</h2>
-              <p className="text-muted-foreground text-base md:text-xl mb-8 md:text-10 leading-relaxed font-medium">
+              <p className="text-muted-foreground text-base md:text-xl mb-8 leading-relaxed font-medium">
                 Bist du bereit für die Praxis? In diesem Test musst du echte von KI-generierten Inhalten unterscheiden. Ein Muss für jeden angehenden Experten.
               </p>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                <Link href="/assessment" className="w-full sm:w-auto">
+                {isAssessmentUnlocked ? (
+                  <Link href="/assessment" className="w-full sm:w-auto">
+                    <Button 
+                      size="lg" 
+                      className="w-full sm:px-12 h-14 md:h-16 rounded-full neon-shadow text-base md:text-lg font-bold group"
+                    >
+                      Test starten <ArrowRight className="ml-2 w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-2 transition-transform" />
+                    </Button>
+                  </Link>
+                ) : (
                   <Button 
                     size="lg" 
-                    disabled={progress.completedModules.length < 2} 
-                    className="w-full sm:px-12 h-14 md:h-16 rounded-full neon-shadow text-base md:text-lg font-bold group"
+                    disabled
+                    className="w-full sm:px-12 h-14 md:h-16 rounded-full text-base md:text-lg font-bold opacity-50 cursor-not-allowed"
                   >
-                    Test starten <ArrowRight className="ml-2 w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-2 transition-transform" />
+                    Test gesperrt <ArrowRight className="ml-2 w-5 h-5 md:w-6 md:h-6" />
                   </Button>
-                </Link>
-                {progress.completedModules.length < 2 && (
+                )}
+                
+                {!isAssessmentUnlocked && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
                     <Sparkles className="w-4 h-4 text-primary" />
                     Noch {2 - progress.completedModules.length} Module bis zum Unlock
