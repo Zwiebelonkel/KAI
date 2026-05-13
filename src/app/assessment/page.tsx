@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -17,10 +18,15 @@ import {
   Globe,
   DollarSign,
   FileText,
-  PhoneCall
+  PhoneCall,
+  Download,
+  FileDown
 } from "lucide-react"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { Certificate } from "@/components/Certificate"
+import html2canvas from "html2canvas"
+import jsPDF from "jspdf"
 
 const cases = [
   {
@@ -130,6 +136,8 @@ export default function AssessmentPage() {
   const [selected, setSelected] = React.useState<number | null>(null);
   const [isDone, setIsDone] = React.useState(false);
   const [results, setResults] = React.useState<boolean[]>([]);
+  const [isExporting, setIsExporting] = React.useState(false);
+  const certificateRef = React.useRef<HTMLDivElement>(null);
 
   const handleSelect = (idx: number) => {
     if (selected !== null) return;
@@ -147,23 +155,75 @@ export default function AssessmentPage() {
     }
   };
 
+  const downloadPDF = async () => {
+    if (!certificateRef.current) return;
+    setIsExporting(true);
+    
+    try {
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("l", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("KAI-Zertifikat.pdf");
+    } catch (error) {
+      console.error("Fehler beim Exportieren des PDFs:", error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const misImg = PlaceHolderImages.find(i => i.id === 'misinformation-hero') || PlaceHolderImages[0];
 
   if (isDone) {
     const score = results.filter(r => r).length;
+    const dateStr = new Date().toLocaleDateString('de-DE');
+    
     return (
-      <div className="min-h-screen pt-20 flex items-center justify-center px-4">
+      <div className="min-h-screen pt-20 pb-20 flex flex-col items-center px-4">
         <Header />
-        <div className="max-w-xl w-full glass-card p-8 md:p-12 rounded-2xl md:rounded-3xl text-center animate-fade-in border-secondary/30">
+        <div className="max-w-4xl w-full glass-card p-8 md:p-12 rounded-2xl md:rounded-3xl text-center animate-fade-in border-secondary/30">
           <Trophy className="w-16 h-16 md:w-20 md:h-20 text-secondary mx-auto mb-6 violet-shadow rounded-full p-4" />
-          <h2 className="text-3xl md:text-4xl font-black mb-4">Check beendet!</h2>
+          <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">Check beendet!</h2>
           <p className="text-lg text-muted-foreground mb-8">
             Du hast {score} von {cases.length} Fällen korrekt beurteilt. 
-            {score === cases.length ? " Unglaublich! Du bist ein wahrer KI-Detektiv." : score >= 7 ? " Sehr gut! Du hast einen scharfen Blick." : score >= 5 ? " Nicht schlecht, aber bleib wachsam!" : " Vorsicht! Du solltest die Module nochmal wiederholen."}
           </p>
-          <Button onClick={() => window.location.href = '/'} size="lg" className="w-full sm:w-auto rounded-full px-12 h-14 font-bold">
-            Zurück zum Hauptmenü
-          </Button>
+
+          <div className="mb-12 overflow-x-auto p-4 bg-white/5 rounded-2xl border border-white/10">
+            <div className="min-w-[800px] transform scale-[0.8] md:scale-100 origin-top">
+              <Certificate 
+                ref={certificateRef}
+                score={score} 
+                total={cases.length} 
+                date={dateStr} 
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={downloadPDF} 
+              disabled={isExporting}
+              size="lg" 
+              className="rounded-full px-8 h-14 font-bold neon-shadow gap-2"
+            >
+              <FileDown className="w-5 h-5" /> {isExporting ? "Generiere PDF..." : "Zertifikat als PDF laden"}
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.location.href = '/'} 
+              size="lg" 
+              className="rounded-full px-8 h-14 font-bold border-white/10 hover:bg-white/5"
+            >
+              Zurück zum Hauptmenü
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -176,7 +236,7 @@ export default function AssessmentPage() {
       <Header />
       <main className="container mx-auto px-4 max-w-4xl">
         <div className="mb-8 md:mb-12 text-center animate-fade-in">
-          <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mx-auto mb-4">
+          <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mx-auto mb-4 border border-primary/30">
             KI-Kompetenz Check: Praxis-Szenarien
           </div>
           <h1 className="text-3xl md:text-5xl font-black mb-2 md:mb-4 tracking-tighter">Echt oder Fake?</h1>
