@@ -75,6 +75,18 @@ export const getRandomTrophies = (count = 3): Trophy[] => {
   return selected;
 };
 
+
+export const getRarityCardClass = (rarity: Rarity) => {
+  switch (rarity) {
+    case 'Common': return 'border-slate-400/30 bg-slate-400/10 shadow-slate-400/10';
+    case 'Rare': return 'border-blue-400/40 bg-blue-400/10 shadow-blue-400/20';
+    case 'Epic': return 'border-purple-400/40 bg-purple-400/10 shadow-purple-400/20';
+    case 'Legendary': return 'border-orange-400/50 bg-orange-400/10 shadow-orange-400/25';
+    case 'Exotic': return 'border-pink-400/60 bg-pink-400/15 shadow-pink-400/30';
+    default: return 'border-white/10 bg-white/5 shadow-black/10';
+  }
+};
+
 export const getRarityColor = (rarity: Rarity) => {
   switch (rarity) {
     case 'Common': return 'text-slate-400';

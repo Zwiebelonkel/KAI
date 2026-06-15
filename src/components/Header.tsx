@@ -9,7 +9,7 @@ import { LearningModule, UserProgress } from "@/lib/types"
 import { modules as fallbackModules } from "@/lib/course-data"
 import { kaiApi } from "@/lib/api-service"
 import { ProgressBar } from "./ProgressBar"
-import { getRarityColor } from "@/lib/lootbox-data"
+import { getRarityCardClass, getRarityColor } from "@/lib/lootbox-data"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -96,7 +96,7 @@ export function Header() {
                     {progress.trophies && progress.trophies.length > 0 ? (
                       <div className="grid grid-cols-4 gap-2 md:gap-3">
                         {progress.trophies.map((t, i) => (
-                          <div key={i} className="aspect-square bg-white/5 border border-white/10 rounded-lg md:rounded-xl flex items-center justify-center text-xl md:text-2xl group relative hover:scale-110 transition-transform cursor-help">
+                          <div key={i} className={cn("aspect-square rounded-lg md:rounded-xl flex items-center justify-center text-xl md:text-2xl group relative hover:scale-110 transition-all cursor-help border shadow-lg", getRarityCardClass(t.rarity))}>
                             {t.emoji}
                             <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-black/90 border border-white/10 rounded-lg text-[10px] whitespace-nowrap z-50 pointer-events-none">
                               <p className="font-bold">{t.name}</p>
