@@ -4,6 +4,7 @@ const DEFAULT_API_BASE_URL = 'https://kaiserver-b3dd.onrender.com';
 const API_BASE_URL = (process.env.NEXT_PUBLIC_KAI_API_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '');
 const TOKEN_KEY = 'kai_auth_token';
 const USER_KEY = 'kai_auth_user';
+const ANONYMOUS_ID_KEY = 'kai_anonymous_completion_id';
 
 export interface AuthUser {
   id: string;
@@ -21,6 +22,11 @@ export interface AdminLearningModule extends LearningModule {
   sortOrder?: number;
 }
 
+export interface AdminModuleCompletionPoint {
+  day: string;
+  completions: number;
+}
+
 export interface AdminModuleInput {
   id: string;
   title: string;
@@ -35,6 +41,19 @@ export interface AdminModuleInput {
 
 function browserStorage() {
   return typeof window === 'undefined' ? null : window.localStorage;
+}
+
+
+function getAnonymousCompletionId(): string {
+  const storage = browserStorage();
+  if (!storage) return crypto.randomUUID();
+
+  const existing = storage.getItem(ANONYMOUS_ID_KEY);
+  if (existing) return existing;
+
+  const anonymousId = crypto.randomUUID();
+  storage.setItem(ANONYMOUS_ID_KEY, anonymousId);
+  return anonymousId;
 }
 
 function authHeaders(): HeadersInit {
@@ -75,6 +94,13 @@ export const kaiApi = {
     return request<LearningModule>(`/modules/${encodeURIComponent(moduleId)}`);
   },
 
+  async submitModuleCompletion(moduleId: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>(`/modules/${encodeURIComponent(moduleId)}/complete`, {
+      method: 'POST',
+      body: JSON.stringify({ anonymousId: getAnonymousCompletionId() }),
+    });
+  },
+
   async listAdminModules(): Promise<AdminLearningModule[]> {
     return request<AdminLearningModule[]>('/admin/modules');
   },
@@ -97,6 +123,10 @@ export const kaiApi = {
     return request<{ ok: boolean }>(`/admin/modules/${encodeURIComponent(moduleId)}`, {
       method: 'DELETE',
     });
+  },
+
+  async getAdminModuleCompletions(moduleId: string): Promise<AdminModuleCompletionPoint[]> {
+    return request<AdminModuleCompletionPoint[]>(`/admin/modules/${encodeURIComponent(moduleId)}/completions`);
   },
 
 
