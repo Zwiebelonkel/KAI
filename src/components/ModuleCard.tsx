@@ -1,9 +1,9 @@
-
 "use client"
 
 import { LearningModule } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { Sparkles, TrendingUp, Grid, Cpu, Lock, CheckCircle2, ArrowUpRight, ShieldAlert } from "lucide-react"
+import { getModuleIcon } from "@/lib/module-icons"
+import { ArrowUpRight, CheckCircle2, Lock } from "lucide-react"
 import Link from "next/link"
 import { ProgressBar } from "./ProgressBar"
 
@@ -14,16 +14,8 @@ interface ModuleCardProps {
   progress: number;
 }
 
-const iconMap: Record<string, any> = {
-  Sparkles,
-  TrendingUp,
-  Grid,
-  Cpu,
-  ShieldAlert
-};
-
 export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCardProps) {
-  const Icon = iconMap[module.icon] || Sparkles;
+  const Icon = getModuleIcon(module.icon);
 
   const content = (
     <div className={cn(
