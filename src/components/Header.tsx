@@ -35,7 +35,8 @@ export function Header() {
 
   const handleLogout = () => {
     kaiApi.logout();
-    window.location.href = '/';
+    const basePath = window.location.pathname.startsWith('/KAI') ? '/KAI' : '';
+    window.location.href = `${basePath}/`;
   };
 
   return (
@@ -69,6 +70,14 @@ export function Header() {
               {progress ? (
                 <div className="space-y-6 md:space-y-8 pb-12">
                   <div className="p-4 rounded-xl md:rounded-2xl bg-white/5 border border-white/10">
+                    {(progress.displayName || kaiApi.getStoredUser()?.displayName || progress.email || kaiApi.getStoredUser()?.email) && (
+                      <div className="mb-4 pb-4 border-b border-white/10">
+                        <span className="block text-xs md:text-sm font-medium text-muted-foreground mb-1">Spieler</span>
+                        <span className="text-white font-bold text-base">
+                          {progress.displayName || kaiApi.getStoredUser()?.displayName || progress.email || kaiApi.getStoredUser()?.email}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs md:text-sm font-medium text-muted-foreground">Aktuelles Level</span>
                       <span className="text-primary font-bold text-sm">{progress.level}</span>

@@ -36,6 +36,8 @@ export interface LearningModule {
 }
 
 export interface UserProgress {
+  displayName?: string | null;
+  email?: string | null;
   level: DifficultyLevel | null;
   completedModules: string[];
   quizScores: Record<string, number>;
