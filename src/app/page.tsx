@@ -5,7 +5,8 @@ import * as React from "react"
 import { Header } from "@/components/Header"
 import { LevelSelector } from "@/components/LevelSelector"
 import { DifficultyLevel, UserProgress } from "@/lib/types"
-import { modules } from "@/lib/course-data"
+import { modules as fallbackModules } from "@/lib/course-data"
+import { kaiApi } from "@/lib/api-service"
 import { ModuleCard } from "@/components/ModuleCard"
 import { Button } from "@/components/ui/button"
 import { Trophy, ShieldAlert, Award, ArrowRight, Sparkles } from "lucide-react"
@@ -14,6 +15,7 @@ import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 
 export default function Home() {
+  const [modules, setModules] = React.useState(fallbackModules);
   const [progress, setProgress] = React.useState<UserProgress>({
     level: null,
     completedModules: [],
@@ -29,6 +31,18 @@ export default function Home() {
     const saved = localStorage.getItem('kai_user_progress');
     if (saved) {
       setProgress(JSON.parse(saved));
+    }
+
+    if (kaiApi.isConfigured) {
+      kaiApi.listModules()
+        .then(setModules)
+        .catch((error) => console.warn('KAI API modules fallback:', error));
+      kaiApi.getProgress()
+        .then((remoteProgress) => {
+          setProgress(remoteProgress);
+          localStorage.setItem('kai_user_progress', JSON.stringify(remoteProgress));
+        })
+        .catch(() => undefined);
     }
   }, []);
 
@@ -59,6 +73,7 @@ export default function Home() {
     const nextProgress = { ...progress, level };
     setProgress(nextProgress);
     localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
+    if (kaiApi.isConfigured) kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress fallback:', error));
   };
 
   const resetLevel = () => {
@@ -71,6 +86,7 @@ export default function Home() {
     };
     setProgress(reset);
     localStorage.removeItem('kai_user_progress');
+    if (kaiApi.isConfigured) kaiApi.saveProgress(reset).catch((error) => console.warn('KAI API progress fallback:', error));
   };
 
   if (!progress.level) {

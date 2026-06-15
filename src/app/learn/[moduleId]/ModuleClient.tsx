@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, BookOpen, Lightbulb, PlayCircle, CheckCircle, Sparkles } from "lucide-react"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { kaiApi } from "@/lib/api-service"
 import { ProgressBar } from "@/components/ProgressBar"
 import { LootboxOverlay } from "@/components/LootboxOverlay"
 import gsap from "gsap"
@@ -79,6 +80,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
     
     currentProgress.quizScores[module.id] = score;
     localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
+    if (kaiApi.isConfigured) kaiApi.saveProgress(currentProgress).catch((error) => console.warn('KAI API progress fallback:', error));
     setIsQuizDone(true);
   };
 
@@ -89,6 +91,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
       if (!currentProgress.trophies) currentProgress.trophies = [];
       currentProgress.trophies.push(trophy);
       localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
+      if (kaiApi.isConfigured) kaiApi.saveProgress(currentProgress).catch((error) => console.warn('KAI API progress fallback:', error));
     }
     setShowLootbox(false);
   };
