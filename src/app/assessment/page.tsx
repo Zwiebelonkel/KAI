@@ -25,6 +25,8 @@ import {
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Certificate } from "@/components/Certificate"
+import { UserProgress } from "@/lib/types"
+import { kaiApi } from "@/lib/api-service"
 import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
 
@@ -137,7 +139,23 @@ export default function AssessmentPage() {
   const [isDone, setIsDone] = React.useState(false);
   const [results, setResults] = React.useState<boolean[]>([]);
   const [isExporting, setIsExporting] = React.useState(false);
+  const [recipientName, setRecipientName] = React.useState<string | null>(null);
   const certificateRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const storedUser = kaiApi.getStoredUser();
+    if (storedUser?.displayName || storedUser?.email) {
+      setRecipientName(storedUser.displayName || storedUser.email);
+    }
+
+    if (kaiApi.isConfigured && kaiApi.getToken()) {
+      kaiApi.getProgress()
+        .then((progress: UserProgress) => {
+          setRecipientName(progress.displayName || progress.email || storedUser?.displayName || storedUser?.email || null);
+        })
+        .catch((error) => console.warn('KAI API progress load failed:', error));
+    }
+  }, []);
 
   const handleSelect = (idx: number) => {
     if (selected !== null) return;
@@ -201,7 +219,8 @@ export default function AssessmentPage() {
                 ref={certificateRef}
                 score={score} 
                 total={cases.length} 
-                date={dateStr} 
+                date={dateStr}
+                recipientName={recipientName}
               />
             </div>
           </div>
