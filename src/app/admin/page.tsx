@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
-import { DifficultyLevel, LearningModule, QuizQuestion } from "@/lib/types"
+import { DifficultyLevel, QuizQuestion } from "@/lib/types"
 import { AdminLearningModule, AdminModuleInput, kaiApi } from "@/lib/api-service"
+import { getModuleIcon, getModuleIconOption, moduleIconOptions } from "@/lib/module-icons"
 import { toast } from "@/hooks/use-toast"
 import { AlertCircle, Database, Eye, EyeOff, Loader2, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
 
@@ -65,6 +66,26 @@ function sanitizeModule(module: AdminModuleInput): AdminModuleInput {
   };
 }
 
+function isModuleFormIncomplete(module: AdminModuleInput): boolean {
+  const hasEmptyBaseField = [module.id, module.title, module.description, module.icon, module.content, module.minLevel].some(
+    (value) => !value.trim()
+  );
+
+  if (hasEmptyBaseField || module.glossary.length === 0 || module.quiz.length === 0) return true;
+
+  const hasEmptyGlossaryField = module.glossary.some((item) => !item.term.trim() || !item.definition.trim());
+  const hasEmptyQuizField = module.quiz.some(
+    (question) =>
+      !question.id.trim() ||
+      !question.question.trim() ||
+      question.options.length !== 4 ||
+      question.options.some((option) => !option.trim()) ||
+      !question.explanation.trim()
+  );
+
+  return hasEmptyGlossaryField || hasEmptyQuizField;
+}
+
 export default function AdminPage() {
   const [modules, setModules] = React.useState<AdminLearningModule[]>([]);
   const [form, setForm] = React.useState<AdminModuleInput>(EMPTY_MODULE);
@@ -110,11 +131,12 @@ export default function AdminPage() {
   };
 
   const saveModule = async () => {
-    const payload = sanitizeModule(form);
-    if (!payload.id || !payload.title || !payload.description || !payload.content) {
-      setError("Bitte fülle ID, Titel, Beschreibung und Inhalt aus.");
+    if (isModuleFormIncomplete(form)) {
+      setError("Bitte fülle alle Felder aus, bevor du das Modul speicherst.");
       return;
     }
+
+    const payload = sanitizeModule(form);
 
     setIsSaving(true);
     setError(null);
@@ -168,6 +190,10 @@ export default function AdminPage() {
     updateForm("quiz", form.quiz.map((item, i) => (i === index ? question : item)));
   };
 
+  const SelectedIcon = getModuleIcon(form.icon);
+  const selectedIconLabel = getModuleIconOption(form.icon).label;
+  const isSaveDisabled = isSaving || isModuleFormIncomplete(form);
+
   return (
     <div className="min-h-screen pt-24 pb-20">
       <Header />
@@ -203,26 +229,35 @@ export default function AdminPage() {
               <div className="py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-3" /> Module werden geladen...</div>
             ) : (
               <div className="space-y-3">
-                {modules.map((module) => (
-                  <div key={module.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-bold">{module.title}</div>
-                        <div className="text-[11px] text-muted-foreground mt-1">{module.id}</div>
-                        <div className="mt-2 text-[10px] font-black uppercase tracking-wider text-primary">
-                          {module.isPublished ?? true ? "Sichtbar" : "Versteckt"} · {module.minLevel}
+                {modules.map((module) => {
+                  const ModuleIcon = getModuleIcon(module.icon);
+
+                  return (
+                    <div key={module.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="rounded-xl bg-primary/10 p-2 text-primary shrink-0">
+                            <ModuleIcon className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold">{module.title}</div>
+                            <div className="text-[11px] text-muted-foreground mt-1">{module.id}</div>
+                            <div className="mt-2 text-[10px] font-black uppercase tracking-wider text-primary">
+                              {module.isPublished ?? true ? "Sichtbar" : "Versteckt"} · {module.minLevel} · {module.icon}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button variant="ghost" size="icon" onClick={() => startEdit(module)} aria-label="Bearbeiten"><Pencil className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toggleVisibility(module)} aria-label="Sichtbarkeit ändern">
+                            {module.isPublished ?? true ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => deleteModule(module.id)} aria-label="Löschen"><Trash2 className="w-4 h-4 text-red-400" /></Button>
                         </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => startEdit(module)} aria-label="Bearbeiten"><Pencil className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => toggleVisibility(module)} aria-label="Sichtbarkeit ändern">
-                          {module.isPublished ?? true ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteModule(module.id)} aria-label="Löschen"><Trash2 className="w-4 h-4 text-red-400" /></Button>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {!modules.length && <p className="py-8 text-center text-sm text-muted-foreground">Noch keine Module gefunden.</p>}
               </div>
             )}
@@ -234,7 +269,7 @@ export default function AdminPage() {
                 <h2 className="text-2xl font-black tracking-tight">{editingId ? "Modul bearbeiten" : "Neues Modul"}</h2>
                 <p className="text-sm text-muted-foreground">Änderungen werden über den Admin-Endpunkt in der Datenbank gespeichert.</p>
               </div>
-              <Button onClick={saveModule} disabled={isSaving} className="gap-2 rounded-full neon-shadow">
+              <Button onClick={saveModule} disabled={isSaveDisabled} className="gap-2 rounded-full neon-shadow">
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Speichern
               </Button>
             </div>
@@ -260,11 +295,30 @@ export default function AdminPage() {
                 <div className="grid gap-2">
                   <Label>Icon</Label>
                   <Select value={form.icon} onValueChange={(value) => updateForm("icon", value)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {["Sparkles", "TrendingUp", "Grid", "Cpu", "Database", "Brain", "Bot", "BookOpen"].map((icon) => <SelectItem key={icon} value={icon}>{icon}</SelectItem>)}
+                    <SelectTrigger className="h-12">
+                      <span className="flex items-center gap-2">
+                        <span className="rounded-lg bg-primary/10 p-1.5 text-primary">
+                          <SelectedIcon className="w-4 h-4" />
+                        </span>
+                        <span>{form.icon}</span>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-80">
+                      {moduleIconOptions.map(({ name, label, Icon }) => (
+                        <SelectItem key={name} value={name}>
+                          <span className="flex items-center gap-2">
+                            <Icon className="w-4 h-4 text-primary" />
+                            <span>{name}</span>
+                            <span className="text-xs text-muted-foreground">{label}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-muted-foreground">
+                    <SelectedIcon className="w-6 h-6 text-primary" />
+                    <span>Vorschau: <strong className="text-foreground">{selectedIconLabel}</strong></span>
+                  </div>
                 </div>
                 <div className="grid gap-2">
                   <Label>Mindest-Level</Label>
