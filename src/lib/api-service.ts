@@ -21,6 +21,11 @@ export interface AdminLearningModule extends LearningModule {
   sortOrder?: number;
 }
 
+export interface AdminModuleCompletionPoint {
+  day: string;
+  completions: number;
+}
+
 export interface AdminModuleInput {
   id: string;
   title: string;
@@ -97,6 +102,10 @@ export const kaiApi = {
     return request<{ ok: boolean }>(`/admin/modules/${encodeURIComponent(moduleId)}`, {
       method: 'DELETE',
     });
+  },
+
+  async getAdminModuleCompletions(moduleId: string): Promise<AdminModuleCompletionPoint[]> {
+    return request<AdminModuleCompletionPoint[]>(`/admin/modules/${encodeURIComponent(moduleId)}/completions`);
   },
 
 

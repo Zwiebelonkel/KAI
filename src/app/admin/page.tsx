@@ -9,10 +9,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
 import { DifficultyLevel, QuizQuestion } from "@/lib/types"
-import { AdminLearningModule, AdminModuleInput, kaiApi } from "@/lib/api-service"
+import { AdminLearningModule, AdminModuleCompletionPoint, AdminModuleInput, kaiApi } from "@/lib/api-service"
 import { getModuleIcon, getModuleIconOption, moduleIconOptions } from "@/lib/module-icons"
 import { toast } from "@/hooks/use-toast"
-import { AlertCircle, Database, Eye, EyeOff, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { AlertCircle, BarChart3, Database, Eye, EyeOff, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
 
 const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || "1234";
 const ADMIN_PIN_SESSION_KEY = "kai_admin_pin_unlocked";
@@ -99,6 +100,9 @@ export default function AdminPage() {
   const [pin, setPin] = React.useState("");
   const [pinError, setPinError] = React.useState<string | null>(null);
   const [isUnlocked, setIsUnlocked] = React.useState(false);
+  const [openStatsModuleId, setOpenStatsModuleId] = React.useState<string | null>(null);
+  const [completionStats, setCompletionStats] = React.useState<Record<string, AdminModuleCompletionPoint[]>>({});
+  const [loadingStatsModuleId, setLoadingStatsModuleId] = React.useState<string | null>(null);
 
   const loadModules = React.useCallback(async () => {
     setIsLoading(true);
@@ -202,6 +206,24 @@ export default function AdminPage() {
       await loadModules();
     } catch (visibilityError) {
       setError(visibilityError instanceof Error ? visibilityError.message : "Sichtbarkeit konnte nicht geändert werden.");
+    }
+  };
+
+  const toggleCompletionStats = async (moduleId: string) => {
+    const shouldOpen = openStatsModuleId !== moduleId;
+    setOpenStatsModuleId(shouldOpen ? moduleId : null);
+
+    if (!shouldOpen || completionStats[moduleId]) return;
+
+    setLoadingStatsModuleId(moduleId);
+    setError(null);
+    try {
+      const stats = await kaiApi.getAdminModuleCompletions(moduleId);
+      setCompletionStats((current) => ({ ...current, [moduleId]: stats }));
+    } catch (statsError) {
+      setError(statsError instanceof Error ? statsError.message : "Abschlussdaten konnten nicht geladen werden.");
+    } finally {
+      setLoadingStatsModuleId(null);
     }
   };
 
@@ -329,6 +351,7 @@ export default function AdminPage() {
                           </div>
                         </div>
                         <div className="flex gap-1 shrink-0">
+                          <Button variant="ghost" size="icon" onClick={() => toggleCompletionStats(module.id)} aria-label="Abschlussverlauf anzeigen"><BarChart3 className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => startEdit(module)} aria-label="Bearbeiten"><Pencil className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => toggleVisibility(module)} aria-label="Sichtbarkeit ändern">
                             {module.isPublished ?? true ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -336,6 +359,38 @@ export default function AdminPage() {
                           <Button variant="ghost" size="icon" onClick={() => deleteModule(module.id)} aria-label="Löschen"><Trash2 className="w-4 h-4 text-red-400" /></Button>
                         </div>
                       </div>
+                      {openStatsModuleId === module.id && (
+                        <div className="mt-4 rounded-2xl border border-primary/20 bg-background/40 p-4">
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-black">Tagesverlauf Abschlüsse</div>
+                              <div className="text-[11px] text-muted-foreground">Wird erst beim Öffnen geladen.</div>
+                            </div>
+                            {loadingStatsModuleId === module.id && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                          </div>
+                          {(completionStats[module.id]?.length ?? 0) > 0 ? (
+                            <div className="h-48">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={completionStats[module.id]} margin={{ left: -20, right: 8, top: 8, bottom: 0 }}>
+                                  <defs>
+                                    <linearGradient id={`completionGradient-${module.id}`} x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.45} />
+                                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                                  <XAxis dataKey="day" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                                  <YAxis allowDecimals={false} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                                  <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "12px" }} labelFormatter={(label) => `Tag: ${label}`} formatter={(value) => [value, "Abschlüsse"]} />
+                                  <Area type="monotone" dataKey="completions" stroke="hsl(var(--primary))" fill={`url(#completionGradient-${module.id})`} strokeWidth={2} />
+                                </AreaChart>
+                              </ResponsiveContainer>
+                            </div>
+                          ) : (
+                            loadingStatsModuleId !== module.id && <p className="py-8 text-center text-xs text-muted-foreground">Noch keine Abschlüsse für dieses Modul.</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
