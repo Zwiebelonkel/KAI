@@ -2,6 +2,7 @@ import { LearningModule, UserProgress } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_KAI_API_URL?.replace(/\/$/, '') || '';
 const TOKEN_KEY = 'kai_auth_token';
+const USER_KEY = 'kai_auth_user';
 
 export interface AuthUser {
   id: string;
@@ -14,9 +15,14 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+function browserStorage() {
+  return typeof window === 'undefined' ? null : window.localStorage;
+}
+
 function authHeaders(): HeadersInit {
-  if (typeof window === 'undefined') return {};
-  const token = localStorage.getItem(TOKEN_KEY);
+  const storage = browserStorage();
+  if (!storage) return {};
+  const token = storage.getItem(TOKEN_KEY);
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -56,7 +62,7 @@ export const kaiApi = {
       method: 'POST',
       body: JSON.stringify({ email, password, displayName }),
     });
-    localStorage.setItem(TOKEN_KEY, auth.token);
+    this.storeAuth(auth);
     return auth;
   },
 
@@ -65,12 +71,35 @@ export const kaiApi = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    localStorage.setItem(TOKEN_KEY, auth.token);
+    this.storeAuth(auth);
     return auth;
   },
 
+  storeAuth(auth: AuthResponse) {
+    const storage = browserStorage();
+    if (!storage) return;
+    storage.setItem(TOKEN_KEY, auth.token);
+    storage.setItem(USER_KEY, JSON.stringify(auth.user));
+  },
+
+  getToken(): string | null {
+    return browserStorage()?.getItem(TOKEN_KEY) || null;
+  },
+
+  getStoredUser(): AuthUser | null {
+    const raw = browserStorage()?.getItem(USER_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as AuthUser;
+    } catch {
+      return null;
+    }
+  },
+
   logout() {
-    localStorage.removeItem(TOKEN_KEY);
+    const storage = browserStorage();
+    storage?.removeItem(TOKEN_KEY);
+    storage?.removeItem(USER_KEY);
   },
 
   async getProgress(): Promise<UserProgress> {

@@ -27,6 +27,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
   const [isQuizDone, setIsQuizDone] = React.useState(false);
   const [showLootbox, setShowLootbox] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
+  const [userProgress, setUserProgress] = React.useState<UserProgress | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -48,15 +49,25 @@ export function ModuleClient({ module }: ModuleClientProps) {
     }
   }, { scope: containerRef });
 
-  // Load state from localStorage on mount
+  // Load user progress from the API when configured; keep local fallback for dev.
   React.useEffect(() => {
-    const saved = localStorage.getItem('kai_user_progress');
-    if (saved) {
-      const parsed: UserProgress = JSON.parse(saved);
-      if (parsed.completedModules.includes(module.id)) {
-        setIsQuizDone(true);
+    const loadProgress = async () => {
+      if (kaiApi.isConfigured && kaiApi.getToken()) {
+        const remoteProgress = await kaiApi.getProgress();
+        setUserProgress(remoteProgress);
+        setIsQuizDone(remoteProgress.completedModules.includes(module.id));
+        return;
       }
-    }
+
+      const saved = localStorage.getItem('kai_user_progress');
+      if (saved) {
+        const parsed: UserProgress = JSON.parse(saved);
+        setUserProgress(parsed);
+        setIsQuizDone(parsed.completedModules.includes(module.id));
+      }
+    };
+
+    loadProgress().catch((error) => console.warn('KAI API progress load failed:', error));
   }, [module.id]);
 
   const handleTermOpen = (term: string) => {
@@ -65,33 +76,44 @@ export function ModuleClient({ module }: ModuleClientProps) {
     }
   };
 
-  const handleQuizComplete = (score: number) => {
-    const saved = localStorage.getItem('kai_user_progress');
-    let currentProgress: UserProgress = saved 
-      ? JSON.parse(saved) 
-      : { level: 'Einsteiger', completedModules: [], quizScores: {}, totalProgress: 0, trophies: [] };
-    
-    const wasAlreadyDone = currentProgress.completedModules.includes(module.id);
-    
-    if (!wasAlreadyDone) {
-      currentProgress.completedModules.push(module.id);
-      setShowLootbox(true);
+  const persistProgress = (nextProgress: UserProgress) => {
+    setUserProgress(nextProgress);
+    if (kaiApi.isConfigured) {
+      kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress save failed:', error));
+    } else {
+      localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
     }
-    
-    currentProgress.quizScores[module.id] = score;
-    localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
-    if (kaiApi.isConfigured) kaiApi.saveProgress(currentProgress).catch((error) => console.warn('KAI API progress fallback:', error));
+  };
+
+  const handleQuizComplete = (score: number) => {
+    const currentProgress: UserProgress = userProgress || {
+      level: 'Einsteiger',
+      completedModules: [],
+      quizScores: {},
+      totalProgress: 0,
+      trophies: [],
+    };
+
+    const wasAlreadyDone = currentProgress.completedModules.includes(module.id);
+    const nextProgress: UserProgress = {
+      ...currentProgress,
+      completedModules: wasAlreadyDone
+        ? currentProgress.completedModules
+        : [...currentProgress.completedModules, module.id],
+      quizScores: { ...currentProgress.quizScores, [module.id]: score },
+    };
+
+    if (!wasAlreadyDone) setShowLootbox(true);
+    persistProgress(nextProgress);
     setIsQuizDone(true);
   };
 
   const handleLootboxClose = (trophy: Trophy) => {
-    const saved = localStorage.getItem('kai_user_progress');
-    if (saved) {
-      const currentProgress: UserProgress = JSON.parse(saved);
-      if (!currentProgress.trophies) currentProgress.trophies = [];
-      currentProgress.trophies.push(trophy);
-      localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
-      if (kaiApi.isConfigured) kaiApi.saveProgress(currentProgress).catch((error) => console.warn('KAI API progress fallback:', error));
+    if (userProgress) {
+      persistProgress({
+        ...userProgress,
+        trophies: [...(userProgress.trophies || []), trophy],
+      });
     }
     setShowLootbox(false);
   };
