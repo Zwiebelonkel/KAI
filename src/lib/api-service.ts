@@ -1,6 +1,7 @@
-import { LearningModule, UserProgress } from './types';
+import { DifficultyLevel, LearningModule, UserProgress } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_KAI_API_URL?.replace(/\/$/, '') || '';
+const DEFAULT_API_BASE_URL = 'https://kaiserver-b3dd.onrender.com';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_KAI_API_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '');
 const TOKEN_KEY = 'kai_auth_token';
 const USER_KEY = 'kai_auth_user';
 
@@ -13,6 +14,23 @@ export interface AuthUser {
 export interface AuthResponse {
   token: string;
   user: AuthUser;
+}
+
+export interface AdminLearningModule extends LearningModule {
+  isPublished?: boolean;
+  sortOrder?: number;
+}
+
+export interface AdminModuleInput {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  content: string;
+  minLevel: DifficultyLevel;
+  glossary: LearningModule['glossary'];
+  quiz: LearningModule['quiz'];
+  isPublished: boolean;
 }
 
 function browserStorage() {
@@ -56,6 +74,31 @@ export const kaiApi = {
   async getModule(moduleId: string): Promise<LearningModule> {
     return request<LearningModule>(`/modules/${encodeURIComponent(moduleId)}`);
   },
+
+  async listAdminModules(): Promise<AdminLearningModule[]> {
+    return request<AdminLearningModule[]>('/admin/modules');
+  },
+
+  async createAdminModule(module: AdminModuleInput): Promise<AdminLearningModule> {
+    return request<AdminLearningModule>('/admin/modules', {
+      method: 'POST',
+      body: JSON.stringify(module),
+    });
+  },
+
+  async updateAdminModule(moduleId: string, module: AdminModuleInput): Promise<AdminLearningModule> {
+    return request<AdminLearningModule>(`/admin/modules/${encodeURIComponent(moduleId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(module),
+    });
+  },
+
+  async deleteAdminModule(moduleId: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>(`/admin/modules/${encodeURIComponent(moduleId)}`, {
+      method: 'DELETE',
+    });
+  },
+
 
   async register(email: string, password: string, displayName?: string): Promise<AuthResponse> {
     const auth = await request<AuthResponse>('/auth/register', {
