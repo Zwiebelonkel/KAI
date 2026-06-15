@@ -22,7 +22,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
 
     const revealTimer = window.setTimeout(() => {
       setRevealedCount((currentCount) => Math.min(currentCount + 1, trophies.length));
-    }, revealedCount === 0 ? 250 : 850);
+    }, revealedCount === 0 ? 150 : 350);
 
     return () => window.clearTimeout(revealTimer);
   }, [revealedCount, state, trophies.length]);
@@ -35,7 +35,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
       const newTrophies = getRandomTrophies(3);
       setTrophies(newTrophies);
       setState('revealing');
-    }, 1500);
+    }, 700);
   };
 
   const handleFinish = () => {
@@ -43,7 +43,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-xl animate-in fade-in duration-500">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
       <div className="max-w-2xl w-full p-8 text-center">
         {state === 'idle' && (
           <div className="animate-fade-in">
@@ -70,7 +70,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
         {state === 'revealing' && (
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full animate-pulse" />
-            <div className="relative animate-in zoom-in duration-700">
+            <div className="relative animate-in zoom-in duration-300">
               <div className="mb-5 flex justify-center">
                 <Button
                   type="button"
@@ -111,7 +111,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
                     <div
                       key={trophy.id}
                       className={cn(
-                        "rounded-3xl border p-5 shadow-2xl backdrop-blur-sm transition-all duration-500",
+                        "rounded-3xl border p-5 shadow-2xl backdrop-blur-sm transition-all duration-200",
                         isRevealed
                           ? "scale-100 border-white/10 bg-white/5 opacity-100 animate-in zoom-in slide-in-from-bottom-8"
                           : "scale-90 border-white/5 bg-white/[0.02] opacity-30"

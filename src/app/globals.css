@@ -83,3 +83,46 @@
     radial-gradient(circle at 80% 20%, rgba(162, 89, 255, 0.03) 0%, transparent 30%);
   animation: mesh-pulse 20s linear infinite;
 }
+
+.liquid-glass {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035)),
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.18), transparent 34%),
+    rgba(255, 255, 255, 0.035);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -42px 80px rgba(255, 255, 255, 0.035),
+    0 30px 90px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+}
+
+.liquid-gradient-text {
+  background: linear-gradient(105deg, #ffffff 0%, #8fc7ff 38%, #b47cff 72%, #ffffff 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: liquid-shimmer 5s ease-in-out infinite;
+}
+
+.liquid-orb {
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.55), transparent 18%),
+    radial-gradient(circle at 72% 74%, rgba(162, 89, 255, 0.5), transparent 28%),
+    linear-gradient(135deg, rgba(77, 150, 255, 0.34), rgba(162, 89, 255, 0.2));
+  filter: blur(2px);
+  animation: liquid-morph 9s ease-in-out infinite;
+}
+
+@keyframes liquid-shimmer {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+@keyframes liquid-morph {
+  0%, 100% { transform: rotate(0deg) scale(1); border-radius: 36% 64% 56% 44% / 45% 35% 65% 55%; }
+  50% { transform: rotate(8deg) scale(1.04); border-radius: 62% 38% 43% 57% / 35% 55% 45% 65%; }
+}
