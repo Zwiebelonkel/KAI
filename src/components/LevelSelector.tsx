@@ -6,6 +6,7 @@ import { DifficultyLevel } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Sparkles, BarChart3, Binary, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { anime, stagger } from "@/lib/anime"
 
 interface LevelSelectorProps {
   onSelect: (level: DifficultyLevel) => void;
@@ -13,6 +14,40 @@ interface LevelSelectorProps {
 
 export function LevelSelector({ onSelect }: LevelSelectorProps) {
   const [selected, setSelected] = React.useState<DifficultyLevel | null>(null);
+  const rootRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!rootRef.current) return;
+    const intro = anime({
+      targets: rootRef.current.querySelectorAll("[data-anime=\"intro\"]"),
+      translateY: [28, 0],
+      opacity: [0, 1],
+      duration: 900,
+      delay: stagger(90),
+      easing: "easeOutExpo",
+    });
+
+    const orbs = anime({
+      targets: rootRef.current.querySelectorAll("[data-anime=\"orb\"]"),
+      translateY: [-10, 10],
+      scale: [0.96, 1.04],
+      duration: 2800,
+      delay: stagger(320),
+      easing: "easeInOutSine",
+    });
+
+    orbs.animations.forEach((animation) => {
+      animation.onfinish = () => {
+        animation.reverse();
+        animation.play();
+      };
+    });
+
+    return () => {
+      intro.cancel();
+      orbs.cancel();
+    };
+  }, []);
 
   const options = [
     { 
@@ -39,24 +74,28 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto py-8 md:py-12 px-4 animate-fade-in">
-      <div className="text-center mb-8 md:mb-12">
+    <div ref={rootRef} className="relative max-w-5xl mx-auto py-8 md:py-12 px-4 animate-fade-in overflow-hidden">
+      <div data-anime="orb" className="pointer-events-none absolute -top-16 left-8 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
+      <div data-anime="orb" className="pointer-events-none absolute top-32 -right-10 h-52 w-52 rounded-full bg-secondary/20 blur-3xl" />
+      <div data-anime="intro" className="relative z-10 text-center mb-8 md:mb-12">
         <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tighter">Willkommen bei KAI</h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto font-medium">
           Wähle dein Wissensniveau aus, damit wir deinen Lernpfad maßschneidern können.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
         {options.map((opt) => (
           <button
             key={opt.id}
             onClick={() => setSelected(opt.id)}
+            data-anime="intro"
             className={cn(
-              "p-6 md:p-8 rounded-2xl glass-card text-left transition-all duration-300 group hover:-translate-y-1 border-2",
+              "p-6 md:p-8 rounded-2xl glass-card text-left transition-all duration-300 group hover:-translate-y-1 border-2 relative overflow-hidden",
               selected === opt.id ? "border-primary violet-shadow" : "border-transparent"
             )}
           >
+            <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             <div className={cn("mb-4 md:mb-6 bg-white/5 p-3 rounded-xl w-fit group-hover:scale-110 transition-transform", opt.color)}>
               {opt.icon}
             </div>
@@ -66,7 +105,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
         ))}
       </div>
 
-      <div className="flex justify-center">
+      <div data-anime="intro" className="relative z-10 flex justify-center">
         <Button 
           size="lg" 
           disabled={!selected} 

@@ -86,7 +86,7 @@ export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCa
   }
 
   return (
-    <Link href={`/learn/${module.id}`} className="block h-full outline-none">
+    <Link href={`/learn?moduleId=${encodeURIComponent(module.id)}`} className="block h-full outline-none">
       {content}
     </Link>
   );
