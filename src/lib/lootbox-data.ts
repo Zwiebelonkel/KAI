@@ -1,5 +1,15 @@
 import { Trophy, Rarity } from './types';
 
+export const RARITY_CHANCES: Record<Rarity, number> = {
+  Common: 60,
+  Rare: 25,
+  Epic: 10,
+  Legendary: 4,
+  Exotic: 1,
+};
+
+export const RARITY_ORDER: Rarity[] = ['Common', 'Rare', 'Epic', 'Legendary', 'Exotic'];
+
 export const TROPHIES: Trophy[] = [
   { id: 't1', emoji: '📜', name: 'Alte Schriftrolle', rarity: 'Common' },
   { id: 't2', emoji: '🔋', name: 'Energie-Zelle', rarity: 'Common' },
@@ -38,10 +48,10 @@ export const getRandomTrophy = (): Trophy => {
   const rand = Math.random() * 100;
   let rarity: Rarity = 'Common';
 
-  if (rand < 1) rarity = 'Exotic';
-  else if (rand < 5) rarity = 'Legendary';
-  else if (rand < 15) rarity = 'Epic';
-  else if (rand < 40) rarity = 'Rare';
+  if (rand < RARITY_CHANCES.Exotic) rarity = 'Exotic';
+  else if (rand < RARITY_CHANCES.Exotic + RARITY_CHANCES.Legendary) rarity = 'Legendary';
+  else if (rand < RARITY_CHANCES.Exotic + RARITY_CHANCES.Legendary + RARITY_CHANCES.Epic) rarity = 'Epic';
+  else if (rand < RARITY_CHANCES.Exotic + RARITY_CHANCES.Legendary + RARITY_CHANCES.Epic + RARITY_CHANCES.Rare) rarity = 'Rare';
   else rarity = 'Common';
 
   const possibleTrophies = TROPHIES.filter(t => t.rarity === rarity);
@@ -49,7 +59,20 @@ export const getRandomTrophy = (): Trophy => {
 };
 
 export const getRandomTrophies = (count = 3): Trophy[] => {
-  return Array.from({ length: count }, () => getRandomTrophy());
+  const selected: Trophy[] = [];
+  const selectedIds = new Set<string>();
+  const maxUniqueCount = Math.min(count, TROPHIES.length);
+
+  while (selected.length < maxUniqueCount) {
+    const trophy = getRandomTrophy();
+
+    if (!selectedIds.has(trophy.id)) {
+      selected.push(trophy);
+      selectedIds.add(trophy.id);
+    }
+  }
+
+  return selected;
 };
 
 export const getRarityColor = (rarity: Rarity) => {
