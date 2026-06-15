@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2, Sparkles, LogOut } from "lucide-react"
+import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2, Sparkles, LogOut, Moon, Sun } from "lucide-react"
 import Link from "next/link"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 import { UserProgress } from "@/lib/types"
@@ -17,6 +17,21 @@ export function Header() {
   const [progress, setProgress] = React.useState<UserProgress | null>(null);
 
   const [moduleCount, setModuleCount] = React.useState(fallbackModules.length);
+  const [theme, setTheme] = React.useState<"dark" | "light">("dark");
+
+  React.useEffect(() => {
+    const storedTheme = localStorage.getItem("kai_theme");
+    const initialTheme = storedTheme === "light" ? "light" : "dark";
+    setTheme(initialTheme);
+    document.documentElement.classList.toggle("dark", initialTheme === "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    localStorage.setItem("kai_theme", nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+  };
 
   const loadProgress = () => {
     if (kaiApi.isConfigured && kaiApi.getToken()) {
@@ -40,19 +55,27 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-white/5 h-16">
+    <header className="fixed top-0 left-0 right-0 z-50 glass-card border-x-0 border-t-0 h-16">
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="bg-primary p-1.5 rounded-lg group-hover:rotate-12 transition-transform duration-300">
+          <div className="bg-primary p-1.5 rounded-lg group-hover:rotate-12 transition-transform duration-300 violet-shadow">
             <BrainCircuit className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
           <span className="text-base md:text-xl font-bold tracking-tight">KAI <span className="text-primary">:</span> <span className="hidden sm:inline">KI Erklärt</span></span>
         </Link>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 text-foreground transition-all hover:-translate-y-0.5 hover:border-secondary/50 hover:text-secondary violet-shadow"
+            aria-label={theme === "dark" ? "Light Mode aktivieren" : "Dark Mode aktivieren"}
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <Sheet onOpenChange={(open) => open && loadProgress()}>
             <SheetTrigger asChild>
-              <button className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full border border-white/10 bg-white/5">
+              <button className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full border border-white/15 bg-white/10">
                 <UserCircle className="w-4 h-4" />
                 <span><span className="hidden xs:inline">Mein </span>Lernstand</span>
               </button>

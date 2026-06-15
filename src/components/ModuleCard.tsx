@@ -1,10 +1,11 @@
 "use client"
 
+import * as React from "react"
 import { LearningModule } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { getModuleIcon } from "@/lib/module-icons"
 import { ArrowUpRight, CheckCircle2, Lock } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ProgressBar } from "./ProgressBar"
 
 interface ModuleCardProps {
@@ -16,18 +17,28 @@ interface ModuleCardProps {
 
 export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCardProps) {
   const Icon = getModuleIcon(module.icon);
+  const router = useRouter();
+  const [isLaunching, setIsLaunching] = React.useState(false);
+
+  const startModule = () => {
+    if (isLocked || isLaunching) return;
+    setIsLaunching(true);
+    window.setTimeout(() => {
+      router.push(`/learn?moduleId=${encodeURIComponent(module.id)}`);
+    }, 760);
+  };
 
   const content = (
     <div className={cn(
-      "p-8 rounded-[2rem] glass-card transition-all duration-500 relative group border-2 h-full flex flex-col overflow-hidden",
+      "p-8 rounded-[2rem] glass-card liquid-violet-glow transition-all duration-500 relative group border-2 h-full flex flex-col overflow-hidden",
       isLocked 
         ? "opacity-40 grayscale pointer-events-none" 
-        : "hover:border-primary/40 hover:-translate-y-2 border-transparent cursor-pointer",
+        : "hover:border-secondary/50 hover:-translate-y-3 hover:rotate-1 border-transparent cursor-pointer",
       isCompleted ? "bg-secondary/[0.03]" : ""
     )}>
       {/* Background glow effect on hover */}
       {!isLocked && (
-        <div className="absolute -inset-24 bg-primary/10 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+        <div className="absolute -inset-24 bg-secondary/20 blur-[90px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none animate-float" />
       )}
 
       {isCompleted && (
@@ -51,7 +62,7 @@ export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCa
       </div>
 
       <div className="mb-8 relative z-10">
-        <h3 className="text-2xl font-black mb-3 tracking-tight group-hover:text-primary transition-colors">{module.title}</h3>
+        <h3 className="text-2xl font-black mb-3 tracking-tight group-hover:text-secondary transition-colors">{module.title}</h3>
         <p className="text-muted-foreground font-medium line-clamp-2 leading-relaxed text-sm">
           {module.description}
         </p>
@@ -65,7 +76,7 @@ export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCa
         <ProgressBar value={progress} className={isCompleted ? "bg-green-500/10" : ""} />
         
         {!isLocked && (
-          <div className="flex items-center gap-2 text-xs font-bold text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pt-2">
+          <div className="flex items-center gap-2 text-xs font-bold text-secondary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pt-2">
             Lektion starten <ArrowUpRight className="w-3 h-3" />
           </div>
         )}
@@ -78,8 +89,17 @@ export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCa
   }
 
   return (
-    <Link href={`/learn?moduleId=${encodeURIComponent(module.id)}`} className="block h-full outline-none">
-      {content}
-    </Link>
+    <>
+      <button type="button" onClick={startModule} className="block h-full w-full text-left outline-none">
+        {content}
+      </button>
+      {isLaunching && (
+        <div className="module-launch-overlay" aria-hidden="true">
+          <div className="launch-card" style={{ "--fly-x": "-34vw", "--fly-rot": "-28deg" } as React.CSSProperties} />
+          <div className="launch-card" style={{ "--fly-x": "0vw", "--fly-rot": "8deg" } as React.CSSProperties} />
+          <div className="launch-card" style={{ "--fly-x": "34vw", "--fly-rot": "28deg" } as React.CSSProperties} />
+        </div>
+      )}
+    </>
   );
 }
