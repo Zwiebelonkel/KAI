@@ -47,3 +47,22 @@ Der Service stellt diese Kernrouten bereit:
 - `GET /modules` und `GET /modules/:moduleId` für Lernmodule aus Turso.
 - `POST /auth/register` und `POST /auth/login` für Benutzerkonten.
 - `GET /me/progress` und `PUT /me/progress` für angemeldeten Lernfortschritt.
+
+## Lokales Setup / npm-Installation
+
+Für reproduzierbare Installationen ist ein `package-lock.json` eingecheckt. Nutze nach Möglichkeit:
+
+```bash
+npm ci
+```
+
+Falls `npm install` unter Windows mit `EPERM`-Cleanup-Warnungen fehlschlägt, beende laufende Next.js-/Node-Prozesse und entferne `node_modules` vor einer erneuten Installation:
+
+```powershell
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+Remove-Item -Recurse -Force node_modules
+npm cache verify
+npm ci
+```
+
+Das Projekt enthält außerdem eine `.npmrc`, die `legacy-peer-deps` und konservativere Fetch-Retry-Einstellungen setzt. Dadurch muss `--legacy-peer-deps` nicht mehr manuell angegeben werden und kurzzeitige Registry-/TLS-Fehler werden robuster behandelt.
