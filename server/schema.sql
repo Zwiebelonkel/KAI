@@ -45,3 +45,15 @@ CREATE TABLE IF NOT EXISTS module_quiz_questions (
   sort_order INTEGER NOT NULL DEFAULT 0,
   FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS module_completions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  module_id TEXT NOT NULL,
+  completed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, module_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_module_completions_module_completed_at
+  ON module_completions(module_id, completed_at);
