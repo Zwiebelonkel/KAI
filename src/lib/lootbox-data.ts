@@ -75,6 +75,9 @@ export const getRandomTrophies = (count = 3): Trophy[] => {
   return selected;
 };
 
+
+export const getRarityCardClass = (rarity: Rarity) => `rarity-card-${rarity.toLowerCase()}`;
+
 export const getRarityColor = (rarity: Rarity) => {
   switch (rarity) {
     case 'Common': return 'text-slate-400';

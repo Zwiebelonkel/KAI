@@ -9,9 +9,10 @@ interface CertificateProps {
   score: number;
   total: number;
   date: string;
+  recipientName?: string | null;
 }
 
-export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(({ score, total, date }, ref) => {
+export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(({ score, total, date, recipientName }, ref) => {
   const percent = Math.round((score / total) * 100);
   
   let title = "KI-Entdecker";
@@ -53,7 +54,9 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(({
       </div>
 
       <div className="flex flex-col items-center z-10 max-w-2xl text-center">
-        <p className="text-xl mb-4 italic text-slate-600">Hiermit wird bestätigt, dass der Teilnehmer den</p>
+        <p className="text-xl mb-4 italic text-slate-600">Hiermit wird bestätigt, dass</p>
+        <p className="text-4xl font-black mb-5 text-slate-900 text-center">{recipientName?.trim() || "Teilnehmer/in"}</p>
+        <p className="text-lg mb-4 italic text-slate-600">den</p>
         <h3 className="text-4xl font-bold mb-6 text-slate-900">KI-Kompetenz Check</h3>
         <p className="text-lg mb-8 text-slate-700 leading-relaxed px-12">
           mit einem Ergebnis von <span className="font-bold text-slate-900">{percent}% ({score} von {total} Punkten)</span> erfolgreich absolviert hat.

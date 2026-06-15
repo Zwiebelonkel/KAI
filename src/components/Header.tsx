@@ -5,18 +5,18 @@ import * as React from "react"
 import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2, Sparkles, LogOut } from "lucide-react"
 import Link from "next/link"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
-import { UserProgress } from "@/lib/types"
+import { LearningModule, UserProgress } from "@/lib/types"
 import { modules as fallbackModules } from "@/lib/course-data"
 import { kaiApi } from "@/lib/api-service"
 import { ProgressBar } from "./ProgressBar"
-import { getRarityColor } from "@/lib/lootbox-data"
+import { getRarityCardClass, getRarityColor } from "@/lib/lootbox-data"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 export function Header() {
   const [progress, setProgress] = React.useState<UserProgress | null>(null);
 
-  const [moduleCount, setModuleCount] = React.useState(fallbackModules.length);
+  const [modules, setModules] = React.useState<LearningModule[]>(fallbackModules);
 
   const loadProgress = () => {
     if (kaiApi.isConfigured && kaiApi.getToken()) {
@@ -24,8 +24,8 @@ export function Header() {
         .then(setProgress)
         .catch((error) => console.warn('KAI API progress load failed:', error));
       kaiApi.listModules()
-        .then((remoteModules) => setModuleCount(remoteModules.length))
-        .catch(() => setModuleCount(fallbackModules.length));
+        .then(setModules)
+        .catch(() => setModules(fallbackModules));
       return;
     }
 
@@ -84,9 +84,9 @@ export function Header() {
                     </div>
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-xs md:text-sm font-medium text-muted-foreground">Module</span>
-                      <span className="font-bold text-sm">{progress.completedModules.length} / {moduleCount}</span>
+                      <span className="font-bold text-sm">{progress.completedModules.length} / {modules.length}</span>
                     </div>
-                    <ProgressBar value={Math.round((progress.completedModules.length / moduleCount) * 100)} />
+                    <ProgressBar value={Math.round((progress.completedModules.length / Math.max(modules.length, 1)) * 100)} />
                   </div>
 
                   <div>
@@ -96,7 +96,7 @@ export function Header() {
                     {progress.trophies && progress.trophies.length > 0 ? (
                       <div className="grid grid-cols-4 gap-2 md:gap-3">
                         {progress.trophies.map((t, i) => (
-                          <div key={i} className="aspect-square bg-white/5 border border-white/10 rounded-lg md:rounded-xl flex items-center justify-center text-xl md:text-2xl group relative hover:scale-110 transition-transform cursor-help">
+                          <div key={i} className={cn("rarity-card aspect-square rounded-lg md:rounded-xl flex items-center justify-center text-xl md:text-2xl group relative hover:scale-110 transition-all cursor-help border shadow-lg", getRarityCardClass(t.rarity))}>
                             {t.emoji}
                             <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-black/90 border border-white/10 rounded-lg text-[10px] whitespace-nowrap z-50 pointer-events-none">
                               <p className="font-bold">{t.name}</p>
@@ -115,7 +115,7 @@ export function Header() {
                   <div>
                     <h4 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-secondary mb-4">Lektionen</h4>
                     <div className="space-y-2 md:space-y-3">
-                      {fallbackModules.map((m) => {
+                      {modules.map((m) => {
                         const isDone = progress.completedModules.includes(m.id);
                         return (
                           <div key={m.id} className={`flex items-center justify-between p-3 rounded-lg md:rounded-xl border transition-colors ${isDone ? 'bg-secondary/10 border-secondary/30' : 'bg-white/5 border-white/5 opacity-50'}`}>
@@ -141,7 +141,7 @@ export function Header() {
                     </Button>
                   )}
 
-                  {progress.completedModules.length >= moduleCount && (
+                  {progress.completedModules.length >= modules.length && (
                     <div className="p-4 rounded-xl md:rounded-2xl bg-gradient-to-br from-secondary/20 to-primary/20 border border-white/10 text-center">
                       <p className="text-xs md:text-sm font-semibold mb-2">Alle Grundlagen gemeistert!</p>
                       <Link href="/assessment">
