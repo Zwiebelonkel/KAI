@@ -78,7 +78,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
 
   const persistProgress = (nextProgress: UserProgress) => {
     setUserProgress(nextProgress);
-    if (kaiApi.isConfigured) {
+    if (kaiApi.isConfigured && kaiApi.getToken()) {
       kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress save failed:', error));
     } else {
       localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
@@ -103,7 +103,10 @@ export function ModuleClient({ module }: ModuleClientProps) {
       quizScores: { ...currentProgress.quizScores, [module.id]: score },
     };
 
-    if (!wasAlreadyDone) setShowLootbox(true);
+    if (!wasAlreadyDone) {
+      setShowLootbox(true);
+      kaiApi.submitModuleCompletion(module.id).catch((error) => console.warn('KAI API completion submit failed:', error));
+    }
     persistProgress(nextProgress);
     setIsQuizDone(true);
   };

@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS module_completions (
   module_id TEXT NOT NULL,
   completed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(user_id, module_id),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_module_completions_module_completed_at
