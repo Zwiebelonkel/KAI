@@ -11,7 +11,10 @@ import { Card } from "@/components/ui/card"
 import { DifficultyLevel, LearningModule, QuizQuestion } from "@/lib/types"
 import { AdminLearningModule, AdminModuleInput, kaiApi } from "@/lib/api-service"
 import { toast } from "@/hooks/use-toast"
-import { AlertCircle, Database, Eye, EyeOff, Loader2, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
+import { AlertCircle, Database, Eye, EyeOff, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
+
+const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || "1234";
+const ADMIN_PIN_SESSION_KEY = "kai_admin_pin_unlocked";
 
 const EMPTY_MODULE: AdminModuleInput = {
   id: "",
@@ -72,6 +75,9 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSaving, setIsSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [pin, setPin] = React.useState("");
+  const [pinError, setPinError] = React.useState<string | null>(null);
+  const [isUnlocked, setIsUnlocked] = React.useState(false);
 
   const loadModules = React.useCallback(async () => {
     setIsLoading(true);
@@ -92,8 +98,26 @@ export default function AdminPage() {
   }, []);
 
   React.useEffect(() => {
-    loadModules();
-  }, [loadModules]);
+    setIsUnlocked(sessionStorage.getItem(ADMIN_PIN_SESSION_KEY) === "true");
+  }, []);
+
+  React.useEffect(() => {
+    if (isUnlocked) loadModules();
+  }, [isUnlocked, loadModules]);
+
+  const submitPin = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (pin !== ADMIN_PIN) {
+      setPinError("Der PIN ist nicht korrekt.");
+      setPin("");
+      return;
+    }
+
+    sessionStorage.setItem(ADMIN_PIN_SESSION_KEY, "true");
+    setPinError(null);
+    setIsUnlocked(true);
+  };
 
   const updateForm = <K extends keyof AdminModuleInput>(key: K, value: AdminModuleInput[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -167,6 +191,64 @@ export default function AdminPage() {
   const updateQuiz = (index: number, question: QuizQuestion) => {
     updateForm("quiz", form.quiz.map((item, i) => (i === index ? question : item)));
   };
+
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-screen pt-24 pb-20 overflow-hidden">
+        <div className="mesh-bg" />
+        <Header />
+        <main className="container mx-auto px-4 max-w-xl">
+          <Card className="glass-card border-primary/20 p-6 md:p-10 relative overflow-hidden">
+            <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-primary/20 blur-3xl" />
+            <div className="relative z-10">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 text-primary neon-shadow">
+                <LockKeyhole className="h-8 w-8" />
+              </div>
+              <div className="mb-8 text-center">
+                <div className="text-primary text-xs font-black uppercase tracking-[0.25em] mb-3">Admin gesperrt</div>
+                <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-3">PIN eingeben</h1>
+                <p className="text-sm text-muted-foreground">
+                  Bitte gib den vierstelligen Admin-PIN ein, bevor Module geladen oder bearbeitet werden.
+                </p>
+              </div>
+
+              <form onSubmit={submitPin} className="space-y-5">
+                <div className="grid gap-2">
+                  <Label htmlFor="adminPin">Vierstelliger PIN</Label>
+                  <Input
+                    id="adminPin"
+                    value={pin}
+                    onChange={(event) => {
+                      setPin(event.target.value.replace(/\D/g, "").slice(0, 4));
+                      setPinError(null);
+                    }}
+                    inputMode="numeric"
+                    pattern="[0-9]{4}"
+                    maxLength={4}
+                    autoComplete="one-time-code"
+                    placeholder="••••"
+                    className="h-14 text-center text-2xl font-black tracking-[0.6em]"
+                    aria-invalid={Boolean(pinError)}
+                    aria-describedby={pinError ? "adminPinError" : undefined}
+                    autoFocus
+                  />
+                  {pinError && <p id="adminPinError" className="text-sm text-red-300">{pinError}</p>}
+                </div>
+
+                <Button type="submit" disabled={pin.length !== 4} className="w-full h-12 rounded-full neon-shadow font-bold">
+                  Admin entsperren
+                </Button>
+              </form>
+
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                Der PIN kann über <code className="rounded bg-white/10 px-1.5 py-0.5">NEXT_PUBLIC_ADMIN_PIN</code> gesetzt werden.
+              </p>
+            </div>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-20">
