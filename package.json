@@ -48,7 +48,6 @@
     "jspdf": "^2.5.1",
     "lucide-react": "^0.475.0",
     "next": "15.5.9",
-    "patch-package": "^8.0.0",
     "react": "^19.2.1",
     "react-day-picker": "^9.11.3",
     "react-dom": "^19.2.1",
@@ -66,5 +65,10 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "packageManager": "npm@11.4.2",
+  "engines": {
+    "node": ">=22 <25",
+    "npm": ">=10"
   }
 }
