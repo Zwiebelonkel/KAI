@@ -6,7 +6,8 @@ import { Header } from "@/components/Header"
 import { LevelSelector } from "@/components/LevelSelector"
 import { DifficultyLevel, UserProgress } from "@/lib/types"
 import { modules as fallbackModules } from "@/lib/course-data"
-import { kaiApi } from "@/lib/api-service"
+import { AuthUser, kaiApi } from "@/lib/api-service"
+import { AuthScreen } from "@/components/AuthScreen"
 import { ModuleCard } from "@/components/ModuleCard"
 import { Button } from "@/components/ui/button"
 import { Trophy, ShieldAlert, Award, ArrowRight, Sparkles } from "lucide-react"
@@ -23,28 +24,49 @@ export default function Home() {
     totalProgress: 0,
     trophies: []
   });
+  const [user, setUser] = React.useState<AuthUser | null>(null);
+  const [isBooting, setIsBooting] = React.useState(true);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // Load progress from localStorage on mount
+  // Load modules and database-backed user progress on mount.
   React.useEffect(() => {
-    const saved = localStorage.getItem('kai_user_progress');
-    if (saved) {
-      setProgress(JSON.parse(saved));
-    }
+    const boot = async () => {
+      if (!kaiApi.isConfigured) {
+        const saved = localStorage.getItem('kai_user_progress');
+        if (saved) setProgress(JSON.parse(saved));
+        setIsBooting(false);
+        return;
+      }
 
-    if (kaiApi.isConfigured) {
+      setUser(kaiApi.getStoredUser());
       kaiApi.listModules()
         .then(setModules)
         .catch((error) => console.warn('KAI API modules fallback:', error));
-      kaiApi.getProgress()
-        .then((remoteProgress) => {
-          setProgress(remoteProgress);
-          localStorage.setItem('kai_user_progress', JSON.stringify(remoteProgress));
-        })
-        .catch(() => undefined);
-    }
+
+      if (!kaiApi.getToken()) {
+        setIsBooting(false);
+        return;
+      }
+
+      try {
+        setProgress(await kaiApi.getProgress());
+      } catch (error) {
+        console.warn('KAI API progress load failed:', error);
+        kaiApi.logout();
+        setUser(null);
+      } finally {
+        setIsBooting(false);
+      }
+    };
+
+    boot();
   }, []);
+
+  const loadRemoteProgress = async (authUser: AuthUser) => {
+    setUser(authUser);
+    setProgress(await kaiApi.getProgress());
+  };
 
   useGSAP(() => {
     if (progress.level && containerRef.current) {
@@ -72,8 +94,11 @@ export default function Home() {
   const handleLevelSelect = (level: DifficultyLevel) => {
     const nextProgress = { ...progress, level };
     setProgress(nextProgress);
-    localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
-    if (kaiApi.isConfigured) kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress fallback:', error));
+    if (kaiApi.isConfigured) {
+      kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress save failed:', error));
+    } else {
+      localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
+    }
   };
 
   const resetLevel = () => {
@@ -85,9 +110,20 @@ export default function Home() {
       trophies: []
     };
     setProgress(reset);
-    localStorage.removeItem('kai_user_progress');
-    if (kaiApi.isConfigured) kaiApi.saveProgress(reset).catch((error) => console.warn('KAI API progress fallback:', error));
+    if (kaiApi.isConfigured) {
+      kaiApi.saveProgress(reset).catch((error) => console.warn('KAI API progress save failed:', error));
+    } else {
+      localStorage.removeItem('kai_user_progress');
+    }
   };
+
+  if (isBooting) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">KAI wird geladen...</div>;
+  }
+
+  if (kaiApi.isConfigured && !user) {
+    return <AuthScreen onAuthenticated={loadRemoteProgress} />;
+  }
 
   if (!progress.level) {
     return <LevelSelector onSelect={handleLevelSelect} />;

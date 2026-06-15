@@ -2,23 +2,40 @@
 "use client"
 
 import * as React from "react"
-import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2, Sparkles } from "lucide-react"
+import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2, Sparkles, LogOut } from "lucide-react"
 import Link from "next/link"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 import { UserProgress } from "@/lib/types"
-import { modules } from "@/lib/course-data"
+import { modules as fallbackModules } from "@/lib/course-data"
+import { kaiApi } from "@/lib/api-service"
 import { ProgressBar } from "./ProgressBar"
 import { getRarityColor } from "@/lib/lootbox-data"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 export function Header() {
   const [progress, setProgress] = React.useState<UserProgress | null>(null);
 
+  const [moduleCount, setModuleCount] = React.useState(fallbackModules.length);
+
   const loadProgress = () => {
-    const saved = localStorage.getItem('kai_user_progress');
-    if (saved) {
-      setProgress(JSON.parse(saved));
+    if (kaiApi.isConfigured && kaiApi.getToken()) {
+      kaiApi.getProgress()
+        .then(setProgress)
+        .catch((error) => console.warn('KAI API progress load failed:', error));
+      kaiApi.listModules()
+        .then((remoteModules) => setModuleCount(remoteModules.length))
+        .catch(() => setModuleCount(fallbackModules.length));
+      return;
     }
+
+    const saved = localStorage.getItem('kai_user_progress');
+    if (saved) setProgress(JSON.parse(saved));
+  };
+
+  const handleLogout = () => {
+    kaiApi.logout();
+    window.location.href = '/';
   };
 
   return (
@@ -58,9 +75,9 @@ export function Header() {
                     </div>
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-xs md:text-sm font-medium text-muted-foreground">Module</span>
-                      <span className="font-bold text-sm">{progress.completedModules.length} / {modules.length}</span>
+                      <span className="font-bold text-sm">{progress.completedModules.length} / {moduleCount}</span>
                     </div>
-                    <ProgressBar value={Math.round((progress.completedModules.length / modules.length) * 100)} />
+                    <ProgressBar value={Math.round((progress.completedModules.length / moduleCount) * 100)} />
                   </div>
 
                   <div>
@@ -89,7 +106,7 @@ export function Header() {
                   <div>
                     <h4 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-secondary mb-4">Lektionen</h4>
                     <div className="space-y-2 md:space-y-3">
-                      {modules.map((m) => {
+                      {fallbackModules.map((m) => {
                         const isDone = progress.completedModules.includes(m.id);
                         return (
                           <div key={m.id} className={`flex items-center justify-between p-3 rounded-lg md:rounded-xl border transition-colors ${isDone ? 'bg-secondary/10 border-secondary/30' : 'bg-white/5 border-white/5 opacity-50'}`}>
@@ -108,7 +125,14 @@ export function Header() {
                     </div>
                   </div>
 
-                  {progress.completedModules.length >= modules.length && (
+
+                  {kaiApi.isConfigured && (
+                    <Button variant="outline" onClick={handleLogout} className="w-full rounded-full gap-2 border-white/10">
+                      <LogOut className="w-4 h-4" /> Ausloggen
+                    </Button>
+                  )}
+
+                  {progress.completedModules.length >= moduleCount && (
                     <div className="p-4 rounded-xl md:rounded-2xl bg-gradient-to-br from-secondary/20 to-primary/20 border border-white/10 text-center">
                       <p className="text-xs md:text-sm font-semibold mb-2">Alle Grundlagen gemeistert!</p>
                       <Link href="/assessment">

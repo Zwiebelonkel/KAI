@@ -1,7 +1,9 @@
-import { LearningModule, UserProgress } from './types';
+import { DifficultyLevel, LearningModule, UserProgress } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_KAI_API_URL?.replace(/\/$/, '') || '';
+const DEFAULT_API_BASE_URL = 'https://kaiserver-b3dd.onrender.com';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_KAI_API_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '');
 const TOKEN_KEY = 'kai_auth_token';
+const USER_KEY = 'kai_auth_user';
 
 export interface AuthUser {
   id: string;
@@ -14,9 +16,31 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+export interface AdminLearningModule extends LearningModule {
+  isPublished?: boolean;
+  sortOrder?: number;
+}
+
+export interface AdminModuleInput {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  content: string;
+  minLevel: DifficultyLevel;
+  glossary: LearningModule['glossary'];
+  quiz: LearningModule['quiz'];
+  isPublished: boolean;
+}
+
+function browserStorage() {
+  return typeof window === 'undefined' ? null : window.localStorage;
+}
+
 function authHeaders(): HeadersInit {
-  if (typeof window === 'undefined') return {};
-  const token = localStorage.getItem(TOKEN_KEY);
+  const storage = browserStorage();
+  if (!storage) return {};
+  const token = storage.getItem(TOKEN_KEY);
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -51,12 +75,37 @@ export const kaiApi = {
     return request<LearningModule>(`/modules/${encodeURIComponent(moduleId)}`);
   },
 
+  async listAdminModules(): Promise<AdminLearningModule[]> {
+    return request<AdminLearningModule[]>('/admin/modules');
+  },
+
+  async createAdminModule(module: AdminModuleInput): Promise<AdminLearningModule> {
+    return request<AdminLearningModule>('/admin/modules', {
+      method: 'POST',
+      body: JSON.stringify(module),
+    });
+  },
+
+  async updateAdminModule(moduleId: string, module: AdminModuleInput): Promise<AdminLearningModule> {
+    return request<AdminLearningModule>(`/admin/modules/${encodeURIComponent(moduleId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(module),
+    });
+  },
+
+  async deleteAdminModule(moduleId: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>(`/admin/modules/${encodeURIComponent(moduleId)}`, {
+      method: 'DELETE',
+    });
+  },
+
+
   async register(email: string, password: string, displayName?: string): Promise<AuthResponse> {
     const auth = await request<AuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, displayName }),
     });
-    localStorage.setItem(TOKEN_KEY, auth.token);
+    this.storeAuth(auth);
     return auth;
   },
 
@@ -65,12 +114,35 @@ export const kaiApi = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    localStorage.setItem(TOKEN_KEY, auth.token);
+    this.storeAuth(auth);
     return auth;
   },
 
+  storeAuth(auth: AuthResponse) {
+    const storage = browserStorage();
+    if (!storage) return;
+    storage.setItem(TOKEN_KEY, auth.token);
+    storage.setItem(USER_KEY, JSON.stringify(auth.user));
+  },
+
+  getToken(): string | null {
+    return browserStorage()?.getItem(TOKEN_KEY) || null;
+  },
+
+  getStoredUser(): AuthUser | null {
+    const raw = browserStorage()?.getItem(USER_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as AuthUser;
+    } catch {
+      return null;
+    }
+  },
+
   logout() {
-    localStorage.removeItem(TOKEN_KEY);
+    const storage = browserStorage();
+    storage?.removeItem(TOKEN_KEY);
+    storage?.removeItem(USER_KEY);
   },
 
   async getProgress(): Promise<UserProgress> {
