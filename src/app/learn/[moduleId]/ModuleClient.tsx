@@ -108,11 +108,11 @@ export function ModuleClient({ module }: ModuleClientProps) {
     setIsQuizDone(true);
   };
 
-  const handleLootboxClose = (trophy: Trophy) => {
+  const handleLootboxClose = (trophies: Trophy[]) => {
     if (userProgress) {
       persistProgress({
         ...userProgress,
-        trophies: [...(userProgress.trophies || []), trophy],
+        trophies: [...(userProgress.trophies || []), ...trophies],
       });
     }
     setShowLootbox(false);
