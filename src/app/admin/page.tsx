@@ -8,12 +8,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
-import { DifficultyLevel, QuizQuestion } from "@/lib/types"
+import { DifficultyLevel, LessonImage, QuizQuestion } from "@/lib/types"
 import { AdminLearningModule, AdminModuleCompletionPoint, AdminModuleInput, kaiApi } from "@/lib/api-service"
 import { getModuleIcon, getModuleIconOption, moduleIconOptions } from "@/lib/module-icons"
 import { toast } from "@/hooks/use-toast"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { AlertCircle, BarChart3, Database, Eye, EyeOff, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
+import { AlertCircle, BarChart3, Database, Eye, EyeOff, ImageIcon, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
 
 const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || "1234";
 const ADMIN_PIN_SESSION_KEY = "kai_admin_pin_unlocked";
@@ -26,6 +26,7 @@ const EMPTY_MODULE: AdminModuleInput = {
   content: "",
   minLevel: "Einsteiger",
   glossary: [{ term: "", definition: "" }],
+  lessonImages: [],
   quiz: [
     {
       id: "q1-neues-modul",
@@ -47,6 +48,7 @@ function toAdminInput(module: AdminLearningModule): AdminModuleInput {
     content: module.content,
     minLevel: module.minLevel,
     glossary: module.glossary.length ? module.glossary : [{ term: "", definition: "" }],
+    lessonImages: module.lessonImages || [],
     quiz: module.quiz.length ? module.quiz : EMPTY_MODULE.quiz,
     isPublished: module.isPublished ?? true,
   };
@@ -59,6 +61,14 @@ function sanitizeModule(module: AdminModuleInput): AdminModuleInput {
     title: module.title.trim(),
     description: module.description.trim(),
     content: module.content.trim(),
+    lessonImages: (module.lessonImages || [])
+      .filter((image) => image.imageUrl.trim())
+      .map((image, index) => ({
+        ...image,
+        id: image.id.trim() || `bild-${index + 1}-${module.id.trim() || "modul"}`,
+        imageUrl: image.imageUrl.trim(),
+        alt: image.alt.trim() || `Bild ${index + 1} zu ${module.title.trim() || "dieser Lektion"}`,
+      })),
     glossary: module.glossary.filter((item) => item.term.trim() || item.definition.trim()),
     quiz: module.quiz
       .filter((question) => question.question.trim())
@@ -78,6 +88,7 @@ function isModuleFormIncomplete(module: AdminModuleInput): boolean {
   if (hasEmptyBaseField || module.glossary.length === 0 || module.quiz.length === 0) return true;
 
   const hasEmptyGlossaryField = module.glossary.some((item) => !item.term.trim() || !item.definition.trim());
+  const hasIncompleteLessonImage = (module.lessonImages || []).some((image) => !image.imageUrl.trim() || !image.alt.trim() || !image.placement);
   const hasEmptyQuizField = module.quiz.some(
     (question) =>
       !question.id.trim() ||
@@ -87,7 +98,7 @@ function isModuleFormIncomplete(module: AdminModuleInput): boolean {
       !question.explanation.trim()
   );
 
-  return hasEmptyGlossaryField || hasEmptyQuizField;
+  return hasEmptyGlossaryField || hasIncompleteLessonImage || hasEmptyQuizField;
 }
 
 export default function AdminPage() {
@@ -150,7 +161,7 @@ export default function AdminPage() {
 
   const startCreate = () => {
     setEditingId(null);
-    setForm({ ...EMPTY_MODULE, glossary: [...EMPTY_MODULE.glossary], quiz: EMPTY_MODULE.quiz.map((q) => ({ ...q, options: [...q.options] })) });
+    setForm({ ...EMPTY_MODULE, glossary: [...EMPTY_MODULE.glossary], lessonImages: [], quiz: EMPTY_MODULE.quiz.map((q) => ({ ...q, options: [...q.options] })) });
   };
 
   const startEdit = (module: AdminLearningModule) => {
@@ -230,6 +241,23 @@ export default function AdminPage() {
   const updateGlossary = (index: number, key: "term" | "definition", value: string) => {
     const next = form.glossary.map((item, i) => (i === index ? { ...item, [key]: value } : item));
     updateForm("glossary", next);
+  };
+
+  const updateLessonImage = (index: number, image: LessonImage) => {
+    updateForm("lessonImages", (form.lessonImages || []).map((item, i) => (i === index ? image : item)));
+  };
+
+  const addLessonImage = () => {
+    const nextIndex = (form.lessonImages || []).length + 1;
+    updateForm("lessonImages", [
+      ...(form.lessonImages || []),
+      {
+        id: `bild-${nextIndex}-${form.id || "modul"}`,
+        imageUrl: "",
+        alt: "",
+        placement: "after-content",
+      },
+    ]);
   };
 
   const updateQuiz = (index: number, question: QuizQuestion) => {
@@ -475,6 +503,45 @@ export default function AdminPage() {
                 <Label htmlFor="content">Lerninhalt</Label>
                 <Textarea id="content" value={form.content} onChange={(e) => updateForm("content", e.target.value)} className="min-h-[140px]" placeholder="Der Haupttext des Moduls..." />
               </div>
+
+              <section className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-black text-lg flex items-center gap-2"><ImageIcon className="h-5 w-5 text-primary" /> Bilder in der Lektion</h3>
+                    <p className="text-xs text-muted-foreground">Füge Bild-URLs ein und wähle, an welcher Stelle der Lektion sie erscheinen.</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={addLessonImage} className="gap-2"><Plus className="w-4 h-4" /> Bild</Button>
+                </div>
+                {(form.lessonImages || []).map((image, index) => (
+                  <div key={image.id || index} className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div className="grid md:grid-cols-[1fr_220px_auto] gap-3">
+                      <Input value={image.imageUrl} onChange={(e) => updateLessonImage(index, { ...image, imageUrl: e.target.value })} placeholder="https://.../bild.jpg" />
+                      <Select value={image.placement} onValueChange={(value: LessonImage["placement"]) => updateLessonImage(index, { ...image, placement: value })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="after-description">Nach der Beschreibung</SelectItem>
+                          <SelectItem value="after-content">Nach dem Lerninhalt</SelectItem>
+                          <SelectItem value="before-glossary">Vor dem Glossar</SelectItem>
+                          <SelectItem value="before-quiz">Vor dem Quiz</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="ghost" size="icon" onClick={() => updateForm("lessonImages", (form.lessonImages || []).filter((_, i) => i !== index))} aria-label="Bild löschen"><Trash2 className="w-4 h-4 text-red-400" /></Button>
+                    </div>
+                    <Input value={image.alt} onChange={(e) => updateLessonImage(index, { ...image, alt: e.target.value })} placeholder="Alternativtext / Bildbeschreibung" />
+                    {image.imageUrl && (
+                      <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={image.imageUrl} alt={image.alt || "Bildvorschau"} className="max-h-48 w-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {!(form.lessonImages || []).length && (
+                  <p className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-4 text-sm text-muted-foreground">
+                    Noch keine zusätzlichen Bilder. Die Lektion funktioniert weiterhin ohne Bildblöcke.
+                  </p>
+                )}
+              </section>
 
               <section className="space-y-4">
                 <div className="flex items-center justify-between">

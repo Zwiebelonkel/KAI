@@ -38,6 +38,7 @@ export interface AdminModuleInput {
   minLevel: DifficultyLevel;
   glossary: LearningModule["glossary"];
   quiz: LearningModule["quiz"];
+  lessonImages?: LearningModule["lessonImages"];
   isPublished: boolean;
 }
 
