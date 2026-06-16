@@ -13,10 +13,57 @@ import { AdminLearningModule, AdminModuleCompletionPoint, AdminModuleInput, kaiA
 import { getModuleIcon, getModuleIconOption, moduleIconOptions } from "@/lib/module-icons"
 import { toast } from "@/hooks/use-toast"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { AlertCircle, BarChart3, Database, Eye, EyeOff, ImageIcon, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react"
+import { AlertCircle, BarChart3, Database, Eye, EyeOff, ImageIcon, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2, Upload } from "lucide-react"
 
 const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || "1234";
 const ADMIN_PIN_SESSION_KEY = "kai_admin_pin_unlocked";
+
+const MAX_IMAGE_EDGE = 1200;
+const IMAGE_QUALITY = 0.72;
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function loadImage(dataUrl: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Das Bild konnte nicht gelesen werden."));
+    image.src = dataUrl;
+  });
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Die Datei konnte nicht geladen werden."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function convertImageFileToBase64(file: File): Promise<{ dataUrl: string; width: number; height: number; size: number }> {
+  if (!file.type.startsWith("image/")) throw new Error("Bitte wähle eine Bilddatei aus.");
+
+  const sourceDataUrl = await readFileAsDataUrl(file);
+  const image = await loadImage(sourceDataUrl);
+  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(image.naturalWidth, image.naturalHeight));
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Der Bild-Konverter ist in diesem Browser nicht verfügbar.");
+
+  context.drawImage(image, 0, 0, width, height);
+  const dataUrl = canvas.toDataURL("image/jpeg", IMAGE_QUALITY);
+
+  return { dataUrl, width, height, size: Math.ceil((dataUrl.length * 3) / 4) };
+}
 
 const EMPTY_MODULE: AdminModuleInput = {
   id: "",
@@ -114,6 +161,7 @@ export default function AdminPage() {
   const [openStatsModuleId, setOpenStatsModuleId] = React.useState<string | null>(null);
   const [completionStats, setCompletionStats] = React.useState<Record<string, AdminModuleCompletionPoint[]>>({});
   const [loadingStatsModuleId, setLoadingStatsModuleId] = React.useState<string | null>(null);
+  const [convertingImageIndex, setConvertingImageIndex] = React.useState<number | null>(null);
 
   const loadModules = React.useCallback(async () => {
     setIsLoading(true);
@@ -245,6 +293,32 @@ export default function AdminPage() {
 
   const updateLessonImage = (index: number, image: LessonImage) => {
     updateForm("lessonImages", (form.lessonImages || []).map((item, i) => (i === index ? image : item)));
+  };
+
+  const uploadLessonImage = async (index: number, file: File | undefined) => {
+    if (!file) return;
+
+    setConvertingImageIndex(index);
+    setError(null);
+    try {
+      const converted = await convertImageFileToBase64(file);
+      const currentImage = (form.lessonImages || [])[index];
+      if (!currentImage) return;
+
+      updateLessonImage(index, {
+        ...currentImage,
+        imageUrl: converted.dataUrl,
+        alt: currentImage.alt || file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
+      });
+      toast({
+        title: "Bild konvertiert",
+        description: `${converted.width}×${converted.height}px · ca. ${formatBytes(converted.size)} als Base64 gespeichert.`,
+      });
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Bild konnte nicht konvertiert werden.");
+    } finally {
+      setConvertingImageIndex(null);
+    }
   };
 
   const addLessonImage = () => {
@@ -508,14 +582,21 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h3 className="font-black text-lg flex items-center gap-2"><ImageIcon className="h-5 w-5 text-primary" /> Bilder in der Lektion</h3>
-                    <p className="text-xs text-muted-foreground">Füge Bild-URLs ein und wähle, an welcher Stelle der Lektion sie erscheinen.</p>
+                    <p className="text-xs text-muted-foreground">Lade Bilder hoch: Sie werden im Browser komprimiert, in Base64 umgewandelt und in der Bildtabelle gespeichert.</p>
                   </div>
                   <Button variant="outline" size="sm" onClick={addLessonImage} className="gap-2"><Plus className="w-4 h-4" /> Bild</Button>
                 </div>
                 {(form.lessonImages || []).map((image, index) => (
                   <div key={image.id || index} className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="grid md:grid-cols-[1fr_220px_auto] gap-3">
-                      <Input value={image.imageUrl} onChange={(e) => updateLessonImage(index, { ...image, imageUrl: e.target.value })} placeholder="https://.../bild.jpg" />
+                      <div className="grid gap-2">
+                        <label className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-white/15 bg-background/40 px-3 py-2 text-sm font-bold text-muted-foreground hover:border-primary/50 hover:text-foreground">
+                          {convertingImageIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                          <span>{image.imageUrl ? "Bild ersetzen" : "Bild auswählen"}</span>
+                          <input type="file" accept="image/*" className="sr-only" disabled={convertingImageIndex === index} onChange={(event) => uploadLessonImage(index, event.target.files?.[0])} />
+                        </label>
+                        <Textarea value={image.imageUrl} onChange={(e) => updateLessonImage(index, { ...image, imageUrl: e.target.value })} placeholder="Base64-Daten-URL oder optional externe https://... Bild-URL" className="min-h-20 font-mono text-xs" />
+                      </div>
                       <Select value={image.placement} onValueChange={(value: LessonImage["placement"]) => updateLessonImage(index, { ...image, placement: value })}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>

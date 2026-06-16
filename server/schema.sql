@@ -46,6 +46,16 @@ CREATE TABLE IF NOT EXISTS module_quiz_questions (
   FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS module_lesson_images (
+  id TEXT PRIMARY KEY,
+  module_id TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  alt TEXT NOT NULL,
+  placement TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (module_id) REFERENCES learning_modules(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS module_completions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,

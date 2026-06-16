@@ -23,8 +23,9 @@ interface ModuleClientProps {
   module: LearningModule;
 }
 
-export function ModuleClient({ module }: ModuleClientProps) {
+export function ModuleClient({ module: initialModule }: ModuleClientProps) {
   const router = useRouter();
+  const [module, setModule] = React.useState(initialModule);
   const [readTerms, setReadTerms] = React.useState<string[]>([]);
   const [isQuizDone, setIsQuizDone] = React.useState(false);
   const [showLootbox, setShowLootbox] = React.useState(false);
@@ -50,6 +51,24 @@ export function ModuleClient({ module }: ModuleClientProps) {
       });
     }
   }, { scope: containerRef });
+
+  // Refresh the module from the API so database-backed lesson images are visible in lessons.
+  React.useEffect(() => {
+    let isMounted = true;
+    setModule(initialModule);
+
+    if (kaiApi.isConfigured) {
+      kaiApi.getModule(initialModule.id)
+        .then((remoteModule) => {
+          if (isMounted) setModule(remoteModule);
+        })
+        .catch((error) => console.warn('KAI module refresh failed:', error));
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [initialModule]);
 
   // Load user progress from the API when configured; keep local fallback for dev.
   React.useEffect(() => {
