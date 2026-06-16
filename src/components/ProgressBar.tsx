@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils"
 interface ProgressBarProps {
   value: number;
   className?: string;
+  indicatorClassName?: string;
 }
 
-export function ProgressBar({ value, className }: ProgressBarProps) {
+export function ProgressBar({ value, className, indicatorClassName }: ProgressBarProps) {
   const [width, setWidth] = React.useState(0);
 
   React.useEffect(() => {
@@ -20,7 +21,7 @@ export function ProgressBar({ value, className }: ProgressBarProps) {
   return (
     <div className={cn("w-full bg-muted rounded-full h-2.5 overflow-hidden", className)}>
       <div 
-        className="bg-secondary h-full transition-all duration-700 ease-out rounded-full violet-shadow"
+        className={cn("bg-secondary h-full transition-all duration-700 ease-out rounded-full violet-shadow", indicatorClassName)}
         style={{ width: `${width}%` }}
       />
     </div>

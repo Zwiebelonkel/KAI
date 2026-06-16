@@ -6,6 +6,7 @@ import { getModuleIcon } from "@/lib/module-icons"
 import { ArrowUpRight, CheckCircle2, Lock } from "lucide-react"
 import Link from "next/link"
 import { ProgressBar } from "./ProgressBar"
+import { getDifficultyStyle } from "@/lib/difficulty-styles"
 
 interface ModuleCardProps {
   module: LearningModule;
@@ -16,18 +17,19 @@ interface ModuleCardProps {
 
 export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCardProps) {
   const Icon = getModuleIcon(module.icon);
+  const difficultyStyle = getDifficultyStyle(module.minLevel);
 
   const content = (
     <div className={cn(
       "p-8 rounded-[2rem] glass-card transition-all duration-500 relative group border-2 h-full flex flex-col overflow-hidden",
       isLocked 
         ? "opacity-40 grayscale pointer-events-none" 
-        : "hover:border-primary/40 hover:-translate-y-2 border-transparent cursor-pointer",
+        : cn("hover:-translate-y-2 border-transparent cursor-pointer", difficultyStyle.cardBorder),
       isCompleted ? "bg-secondary/[0.03]" : ""
     )}>
       {/* Background glow effect on hover */}
       {!isLocked && (
-        <div className="absolute -inset-24 bg-primary/10 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+        <div className={cn("absolute -inset-24 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none", difficultyStyle.glow)} />
       )}
 
       {isCompleted && (
@@ -44,14 +46,14 @@ export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCa
 
       <div className={cn(
         "p-4 rounded-2xl w-fit mb-8 relative transition-transform duration-500 group-hover:scale-110",
-        isCompleted ? "bg-green-500/10 text-green-400" : "bg-primary/10 text-primary"
+        isCompleted ? "bg-green-500/10 text-green-400" : difficultyStyle.icon
       )}>
         <Icon className="w-8 h-8" />
         <div className="absolute inset-0 bg-current opacity-10 blur-xl rounded-full" />
       </div>
 
       <div className="mb-8 relative z-10">
-        <h3 className="text-2xl font-black mb-3 tracking-tight group-hover:text-primary transition-colors">{module.title}</h3>
+        <h3 className={cn("text-2xl font-black mb-3 tracking-tight transition-colors", difficultyStyle.title)}>{module.title}</h3>
         <p className="text-muted-foreground font-medium line-clamp-2 leading-relaxed text-sm">
           {module.description}
         </p>
@@ -62,10 +64,14 @@ export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCa
           <span>Status</span>
           <span className={cn(isCompleted ? "text-green-400" : "")}>{progress}%</span>
         </div>
-        <ProgressBar value={progress} className={isCompleted ? "bg-green-500/10" : ""} />
+        <ProgressBar
+          value={progress}
+          className={isCompleted ? difficultyStyle.completedTrack : difficultyStyle.progressTrack}
+          indicatorClassName={isCompleted ? "bg-green-400 shadow-[0_0_20px_rgba(74,222,128,0.45)]" : difficultyStyle.progress}
+        />
         
         {!isLocked && (
-          <div className="flex items-center gap-2 text-xs font-bold text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pt-2">
+          <div className={cn("flex items-center gap-2 text-xs font-bold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pt-2", difficultyStyle.action)}>
             Lektion starten <ArrowUpRight className="w-3 h-3" />
           </div>
         )}
