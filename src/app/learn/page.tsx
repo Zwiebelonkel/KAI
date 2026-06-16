@@ -29,21 +29,25 @@ function LearnModuleContent() {
       }
 
       const localModule = fallbackModules.find((item) => item.id === moduleId);
-      if (localModule) {
-        setModule(localModule);
-        setIsLoading(false);
-        return;
+
+      if (kaiApi.isConfigured) {
+        try {
+          const remoteModule = await kaiApi.getModule(moduleId);
+          if (isMounted) setModule(remoteModule);
+          return;
+        } catch (loadError) {
+          console.warn('KAI module load failed:', loadError);
+        } finally {
+          if (isMounted) setIsLoading(false);
+        }
       }
 
-      try {
-        const remoteModule = await kaiApi.getModule(moduleId);
-        if (isMounted) setModule(remoteModule);
-      } catch (loadError) {
-        console.warn('KAI module load failed:', loadError);
-        if (isMounted) setError('Dieses Modul konnte nicht geladen werden.');
-      } finally {
-        if (isMounted) setIsLoading(false);
+      if (localModule) {
+        setModule(localModule);
+      } else {
+        setError('Dieses Modul konnte nicht geladen werden.');
       }
+      setIsLoading(false);
     }
 
     loadModule();
