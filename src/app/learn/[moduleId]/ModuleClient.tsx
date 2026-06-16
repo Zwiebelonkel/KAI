@@ -8,7 +8,7 @@ import { LearningModule, UserProgress, Trophy } from "@/lib/types"
 import { GlossaryCard } from "@/components/GlossaryCard"
 import { Quiz } from "@/components/Quiz"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, BookOpen, Lightbulb, PlayCircle, CheckCircle, Sparkles } from "lucide-react"
+import { ArrowLeft, BookOpen, Lightbulb, PlayCircle, CheckCircle, Sparkles, FileText } from "lucide-react"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { kaiApi } from "@/lib/api-service"
@@ -21,6 +21,45 @@ import { useGSAP } from "@gsap/react"
 
 interface ModuleClientProps {
   module: LearningModule;
+}
+
+function splitLessonContent(content: string): string[] {
+  return content
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+}
+
+function renderLessonBlock(block: string, index: number, accentText: string) {
+  if (/^#{1,3}\s+/.test(block)) {
+    return (
+      <h3 key={index} className="pt-3 text-2xl md:text-3xl font-black tracking-tight text-white">
+        {block.replace(/^#{1,3}\s+/, "")}
+      </h3>
+    );
+  }
+
+  const lines = block.split(/\n/).map((line) => line.trim()).filter(Boolean);
+  const isList = lines.length > 1 && lines.every((line) => /^[-*•]\s+/.test(line));
+
+  if (isList) {
+    return (
+      <ul key={index} className="space-y-3 pl-2">
+        {lines.map((line, lineIndex) => (
+          <li key={lineIndex} className="flex gap-3 text-base md:text-lg leading-8 text-white/82">
+            <span className={cn("mt-3 h-2 w-2 shrink-0 rounded-full", accentText.replace("text-", "bg-"))} />
+            <span>{line.replace(/^[-*•]\s+/, "")}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <p key={index} className="text-base md:text-lg leading-8 md:leading-9 text-white/82">
+      {block}
+    </p>
+  );
 }
 
 export function ModuleClient({ module: initialModule }: ModuleClientProps) {
@@ -153,6 +192,7 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
                     PlaceHolderImages[0];
   const difficultyColors = getDifficultyColors(module.minLevel);
   const lessonImages = module.lessonImages || [];
+  const lessonContentBlocks = splitLessonContent(module.content);
   const renderLessonImages = (placement: NonNullable<LearningModule["lessonImages"]>[number]["placement"]) => {
     const images = lessonImages.filter((image) => image.placement === placement && image.imageUrl);
     if (!images.length) return null;
@@ -220,19 +260,35 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
         </div>
 
         <article className="max-w-none mb-16 md:mb-24 space-y-12 md:space-y-20">
-          <div className={cn("animate-reveal p-6 md:p-12 rounded-2xl md:rounded-[2.5rem] border flex flex-col md:flex-row gap-6 md:gap-8 items-start relative overflow-hidden group bg-gradient-to-br via-white/[0.03] to-transparent", difficultyColors.gradient, difficultyColors.accentBorder)}>
+          <section className={cn("animate-reveal p-6 md:p-12 rounded-2xl md:rounded-[2.5rem] border flex flex-col md:flex-row gap-6 md:gap-8 items-start relative overflow-hidden group bg-gradient-to-br via-white/[0.03] to-transparent", difficultyColors.gradient, difficultyColors.accentBorder)} aria-labelledby="lesson-overview-title">
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform duration-700 hidden md:block">
                <Sparkles className={cn("w-32 h-32", difficultyColors.accentText)} />
             </div>
             <div className={cn("p-3 md:p-4 rounded-xl md:rounded-2xl relative z-10 animate-float border", difficultyColors.accentBg, difficultyColors.accentBorder, difficultyColors.accentShadow)}>
                <Lightbulb className={cn("w-6 h-6 md:w-10 md:h-10", difficultyColors.accentText)} />
             </div>
-            <div className="relative z-10">
+            <div className="relative z-10 space-y-3">
+              <p className={cn("text-sm md:text-base font-black uppercase tracking-[0.3em]", difficultyColors.accentText)} id="lesson-overview-title">Overview</p>
               <p className="text-xl md:text-3xl font-bold italic leading-snug tracking-tight text-white/90">
-                "{module.content}"
+                “{module.description}”
               </p>
             </div>
-          </div>
+          </section>
+
+          <section className={cn("animate-reveal rounded-2xl md:rounded-[2.5rem] border bg-card/85 p-6 md:p-12 shadow-2xl backdrop-blur-xl", difficultyColors.accentBorder, difficultyColors.accentShadow)} aria-labelledby="lesson-content-title">
+            <div className="mb-8 flex items-start gap-4 md:gap-5">
+              <div className={cn("p-3 md:p-4 rounded-xl md:rounded-2xl border", difficultyColors.accentBg, difficultyColors.accentBorder, difficultyColors.accentText)}>
+                <FileText className="h-6 w-6 md:h-8 md:w-8" />
+              </div>
+              <div>
+                <p className={cn("mb-2 text-sm md:text-base font-black uppercase tracking-[0.3em]", difficultyColors.accentText)}>Lerninhalt</p>
+                <h2 id="lesson-content-title" className="text-2xl md:text-4xl font-black tracking-tight">{module.title}</h2>
+              </div>
+            </div>
+            <div className="space-y-6 md:space-y-8">
+              {lessonContentBlocks.map((block, index) => renderLessonBlock(block, index, difficultyColors.accentText))}
+            </div>
+          </section>
 
           {renderLessonImages("after-content")}
           {renderLessonImages("before-glossary")}
