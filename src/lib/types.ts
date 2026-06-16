@@ -10,6 +10,13 @@ export interface Trophy {
   rarity: Rarity;
 }
 
+export interface LessonImage {
+  id: string;
+  imageUrl: string;
+  alt: string;
+  placement: 'after-description' | 'after-content' | 'before-glossary' | 'before-quiz';
+}
+
 export interface QuizQuestion {
   id: string;
   question: string;
@@ -32,6 +39,7 @@ export interface LearningModule {
   content: string;
   glossary: GlossaryItem[];
   quiz: QuizQuestion[];
+  lessonImages?: LessonImage[];
   minLevel: DifficultyLevel;
 }
 

@@ -133,6 +133,23 @@ export function ModuleClient({ module }: ModuleClientProps) {
   const heroImage = PlaceHolderImages.find(img => img.id === imageId) || 
                     PlaceHolderImages[0];
   const difficultyColors = getDifficultyColors(module.minLevel);
+  const lessonImages = module.lessonImages || [];
+  const renderLessonImages = (placement: NonNullable<LearningModule["lessonImages"]>[number]["placement"]) => {
+    const images = lessonImages.filter((image) => image.placement === placement && image.imageUrl);
+    if (!images.length) return null;
+
+    return (
+      <div className="animate-reveal grid gap-6">
+        {images.map((image) => (
+          <figure key={image.id} className={cn("overflow-hidden rounded-2xl md:rounded-[2rem] border bg-white/[0.03]", difficultyColors.accentBorder)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image.imageUrl} alt={image.alt} className="max-h-[520px] w-full object-cover" />
+            {image.alt && <figcaption className="px-5 py-3 text-sm text-muted-foreground">{image.alt}</figcaption>}
+          </figure>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen pt-20 pb-20 overflow-x-hidden" ref={containerRef}>
@@ -166,6 +183,8 @@ export function ModuleClient({ module }: ModuleClientProps) {
           <p className="text-lg md:text-2xl text-muted-foreground leading-relaxed font-medium max-w-3xl">{module.description}</p>
         </div>
 
+        {renderLessonImages("after-description")}
+
         <div className={cn("relative aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden mb-12 md:mb-16 glass-card group hero-visual shadow-2xl border", difficultyColors.accentBorder, difficultyColors.accentShadow)}>
           <Image 
             src={heroImage.imageUrl} 
@@ -195,6 +214,9 @@ export function ModuleClient({ module }: ModuleClientProps) {
               </p>
             </div>
           </div>
+
+          {renderLessonImages("after-content")}
+          {renderLessonImages("before-glossary")}
           
           <div className="animate-reveal">
             <h2 className="text-2xl md:text-3xl font-black mb-6 md:mb-8 flex items-center gap-3 md:gap-4 tracking-tight">
@@ -217,6 +239,8 @@ export function ModuleClient({ module }: ModuleClientProps) {
             </div>
           </div>
         </article>
+
+        {renderLessonImages("before-quiz")}
 
         <section id="quiz" className="animate-reveal scroll-mt-24">
           <Quiz 
