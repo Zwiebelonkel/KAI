@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { DifficultyLevel } from "@/lib/types"
+import { getDifficultyColors } from "@/lib/difficulty-colors"
 import { Button } from "@/components/ui/button"
 import { Sparkles, BarChart3, Binary, ArrowRight, BrainCircuit, Trophy, ShieldCheck, WandSparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -64,33 +65,21 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
       title: 'Einsteiger', 
       desc: 'Keine Vorkenntnisse nötig. Wir starten bei Null.', 
       icon: <Sparkles className="w-6 h-6" />,
-      color: "text-emerald-300",
-      glow: "from-emerald-500/30 to-teal-400/10",
-      selectedBorder: "border-emerald-400/70",
-      selectedShadow: "shadow-[0_0_55px_rgba(52,211,153,0.26)]",
-      selectedArrow: "border-emerald-400 bg-emerald-400 text-slate-950"
+      colors: getDifficultyColors('Einsteiger')
     },
     { 
       id: 'Basics' as DifficultyLevel, 
       title: 'Grundlagen', 
       desc: 'Du weißt was Daten sind und willst tiefer graben.', 
       icon: <BarChart3 className="w-6 h-6" />,
-      color: "text-sky-300",
-      glow: "from-sky-500/30 to-cyan-400/10",
-      selectedBorder: "border-sky-400/70",
-      selectedShadow: "shadow-[0_0_55px_rgba(56,189,248,0.26)]",
-      selectedArrow: "border-sky-400 bg-sky-400 text-slate-950"
+      colors: getDifficultyColors('Basics')
     },
     { 
       id: 'Fortgeschritten' as DifficultyLevel, 
       title: 'Experte', 
       desc: 'Mathe & Logik schrecken dich nicht ab. Deep Dive.', 
       icon: <Binary className="w-6 h-6" />,
-      color: "text-fuchsia-300",
-      glow: "from-fuchsia-500/30 to-purple-400/10",
-      selectedBorder: "border-fuchsia-400/70",
-      selectedShadow: "shadow-[0_0_55px_rgba(232,121,249,0.26)]",
-      selectedArrow: "border-fuchsia-400 bg-fuchsia-400 text-slate-950"
+      colors: getDifficultyColors('Fortgeschritten')
     }
   ];
 
@@ -207,20 +196,20 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
               data-anime="glass-card"
               className={cn(
                 "liquid-glass group relative overflow-hidden rounded-[2rem] p-6 text-left transition-all duration-300 hover:-translate-y-2 hover:border-white/25",
-                selected === opt.id ? cn(opt.selectedBorder, opt.selectedShadow) : "border-white/12"
+                selected === opt.id ? cn(opt.colors.selectedBorder, opt.colors.selectedShadow) : "border-white/12"
               )}
             >
-              <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100", opt.glow)} />
+              <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100", opt.colors.gradient)} />
               <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
               <div className="relative z-10">
-                <div className={cn("mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] transition-transform group-hover:scale-110", opt.color)}>
+                <div className={cn("mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] transition-transform group-hover:scale-110", opt.colors.accentText)}>
                   {opt.icon}
                 </div>
                 <h3 className="mb-2 text-2xl font-black tracking-tight">{opt.title}</h3>
                 <p className="text-sm font-medium leading-relaxed text-white/58">{opt.desc}</p>
                 <div className="mt-6 flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase tracking-[0.22em] text-white/40">Level wählen</span>
-                  <span className={cn("flex h-9 w-9 items-center justify-center rounded-full border transition-all", selected === opt.id ? opt.selectedArrow : "border-white/15 bg-white/[0.04] text-white/50 group-hover:text-white")}>
+                  <span className={cn("flex h-9 w-9 items-center justify-center rounded-full border transition-all", selected === opt.id ? opt.colors.selectedArrow : "border-white/15 bg-white/[0.04] text-white/50 group-hover:text-white")}>
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
