@@ -24,7 +24,7 @@ export function ModuleCard({ module, isLocked, isCompleted, progress }: ModuleCa
       "p-8 rounded-[2rem] glass-card transition-all duration-500 relative group border-2 h-full flex flex-col overflow-hidden",
       isLocked 
         ? "opacity-40 grayscale pointer-events-none" 
-        : cn("hover:-translate-y-2 border-transparent cursor-pointer", difficultyStyle.cardBorder),
+        : cn("hover:-translate-y-2 cursor-pointer", difficultyStyle.cardBorder, difficultyStyle.cardSurface),
       isCompleted ? "bg-secondary/[0.03]" : ""
     )}>
       {/* Background glow effect on hover */}

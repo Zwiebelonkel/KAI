@@ -13,7 +13,9 @@ import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { kaiApi } from "@/lib/api-service"
 import { ProgressBar } from "@/components/ProgressBar"
+import { getDifficultyColors } from "@/lib/difficulty-colors"
 import { LootboxOverlay } from "@/components/LootboxOverlay"
+import { cn } from "@/lib/utils"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 
@@ -130,6 +132,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
   const imageId = `${module.id.split('-')[0]}-hero`;
   const heroImage = PlaceHolderImages.find(img => img.id === imageId) || 
                     PlaceHolderImages[0];
+  const difficultyColors = getDifficultyColors(module.minLevel);
 
   return (
     <div className="min-h-screen pt-20 pb-20 overflow-x-hidden" ref={containerRef}>
@@ -139,7 +142,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
       {showLootbox && <LootboxOverlay onClose={handleLootboxClose} />}
 
       <div className="fixed bottom-0 left-0 right-0 z-[60] h-1.5 bg-background">
-        <ProgressBar value={progress} className="h-full rounded-none" />
+        <ProgressBar value={progress} className={cn("h-full rounded-none", difficultyColors.progressTrack)} indicatorClassName={difficultyColors.progress} />
       </div>
 
       <main className="container mx-auto px-4 max-w-4xl">
@@ -163,7 +166,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
           <p className="text-lg md:text-2xl text-muted-foreground leading-relaxed font-medium max-w-3xl">{module.description}</p>
         </div>
 
-        <div className="relative aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden mb-12 md:mb-16 glass-card border-white/10 group hero-visual shadow-primary/10 shadow-2xl">
+        <div className={cn("relative aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden mb-12 md:mb-16 glass-card group hero-visual shadow-2xl border", difficultyColors.accentBorder, difficultyColors.accentShadow)}>
           <Image 
             src={heroImage.imageUrl} 
             alt={heroImage.description} 
@@ -172,19 +175,19 @@ export function ModuleClient({ module }: ModuleClientProps) {
             data-ai-hint={heroImage.imageHint}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent flex items-center justify-center">
-            <Button size="icon" className="w-16 h-16 md:w-24 md:h-24 rounded-full neon-shadow hover:scale-110 transition-transform bg-primary text-white border-0">
+            <Button size="icon" className={cn("w-16 h-16 md:w-24 md:h-24 rounded-full hover:scale-110 transition-transform border-0", difficultyColors.selectedArrow, difficultyColors.accentShadow)}>
               <PlayCircle className="w-8 h-8 md:w-12 md:h-12 fill-white" />
             </Button>
           </div>
         </div>
 
         <article className="max-w-none mb-16 md:mb-24 space-y-12 md:space-y-20">
-          <div className="animate-reveal p-6 md:p-12 rounded-2xl md:rounded-[2.5rem] premium-gradient border border-white/5 flex flex-col md:flex-row gap-6 md:gap-8 items-start relative overflow-hidden group">
+          <div className={cn("animate-reveal p-6 md:p-12 rounded-2xl md:rounded-[2.5rem] border flex flex-col md:flex-row gap-6 md:gap-8 items-start relative overflow-hidden group bg-gradient-to-br via-white/[0.03] to-transparent", difficultyColors.gradient, difficultyColors.accentBorder)}>
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform duration-700 hidden md:block">
-               <Sparkles className="w-32 h-32 text-primary" />
+               <Sparkles className={cn("w-32 h-32", difficultyColors.accentText)} />
             </div>
-            <div className="bg-primary/20 p-3 md:p-4 rounded-xl md:rounded-2xl relative z-10 neon-shadow animate-float">
-               <Lightbulb className="w-6 h-6 md:w-10 md:h-10 text-primary" />
+            <div className={cn("p-3 md:p-4 rounded-xl md:rounded-2xl relative z-10 animate-float border", difficultyColors.accentBg, difficultyColors.accentBorder, difficultyColors.accentShadow)}>
+               <Lightbulb className={cn("w-6 h-6 md:w-10 md:h-10", difficultyColors.accentText)} />
             </div>
             <div className="relative z-10">
               <p className="text-xl md:text-3xl font-bold italic leading-snug tracking-tight text-white/90">
@@ -195,7 +198,7 @@ export function ModuleClient({ module }: ModuleClientProps) {
           
           <div className="animate-reveal">
             <h2 className="text-2xl md:text-3xl font-black mb-6 md:mb-8 flex items-center gap-3 md:gap-4 tracking-tight">
-              <div className="bg-secondary/20 p-2 md:p-3 rounded-xl md:rounded-2xl text-secondary violet-shadow">
+              <div className={cn("p-2 md:p-3 rounded-xl md:rounded-2xl border", difficultyColors.accentBg, difficultyColors.accentBorder, difficultyColors.accentText, difficultyColors.accentShadow)}>
                 <BookOpen className="w-6 h-6 md:w-8 md:h-8" /> 
               </div>
               Glossar: Fachbegriffe
