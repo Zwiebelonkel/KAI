@@ -462,6 +462,7 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
                   definition={item.definition}
                   onOpen={() => handleTermOpen(item.term)}
                   isRead={readTerms.includes(item.term)}
+                  difficultyColors={difficultyColors}
                 />
               ))}
             </div>
@@ -471,15 +472,19 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
         {renderLessonImages("before-quiz")}
 
         <section id="quiz" className="animate-reveal scroll-mt-24">
-          <Quiz questions={module.quiz} onComplete={handleQuizComplete} />
+          <Quiz
+            questions={module.quiz}
+            onComplete={handleQuizComplete}
+            difficultyColors={difficultyColors}
+          />
         </section>
 
         {isQuizDone && (
           <div className="mt-12 md:mt-20 text-center animate-in fade-in slide-in-from-bottom-5 duration-700">
             <Button
               size="lg"
-              onClick={() => router.push("/")}
-              className="w-full sm:w-auto rounded-full px-12 md:px-16 h-14 md:h-16 text-lg md:text-xl font-bold neon-shadow group"
+              onClick={() => router.push('/')}
+              className={cn("w-full sm:w-auto rounded-full px-12 md:px-16 h-14 md:h-16 text-lg md:text-xl font-bold group", difficultyColors.selectedArrow, difficultyColors.accentShadow)}
             >
               Lektion abschließen{" "}
               <ArrowLeft className="ml-4 w-5 h-5 md:w-6 md:h-6 rotate-180 group-hover:translate-x-2 transition-transform" />

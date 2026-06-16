@@ -10,6 +10,7 @@ import { AuthUser, kaiApi } from "@/lib/api-service"
 import { AuthScreen } from "@/components/AuthScreen"
 import { ModuleCard } from "@/components/ModuleCard"
 import { getDifficultyStyle } from "@/lib/difficulty-styles"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Trophy, ShieldAlert, Award, ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
@@ -151,7 +152,7 @@ export default function Home() {
                 </span>
                 <button 
                   onClick={resetLevel} 
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors border-b border-transparent hover:border-primary"
+                  className={cn("text-xs text-muted-foreground transition-colors border-b border-transparent", difficultyStyle.accentBorder, difficultyStyle.accentText)}
                 >
                   Level ändern
                 </button>
@@ -204,11 +205,11 @@ export default function Home() {
               <Trophy className="w-96 h-96" />
             </div>
             
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-50" />
+            <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-secondary/10 opacity-50", difficultyStyle.gradient)} />
             
             <div className="relative z-10 max-w-2xl">
-              <div className="bg-primary/20 p-3 md:p-4 rounded-xl md:rounded-2xl w-fit mb-6 md:mb-8 border border-primary/30 neon-shadow animate-float">
-                <ShieldAlert className="w-8 h-8 md:w-10 md:h-10 text-primary" />
+              <div className={cn("p-3 md:p-4 rounded-xl md:rounded-2xl w-fit mb-6 md:mb-8 border animate-float", difficultyStyle.accentBg, difficultyStyle.accentBorder, difficultyStyle.accentShadow)}>
+                <ShieldAlert className={cn("w-8 h-8 md:w-10 md:h-10", difficultyStyle.accentText)} />
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-5xl font-black mb-4 md:mb-6 tracking-tight">KI-Kompetenz Check</h2>
               <p className="text-muted-foreground text-base md:text-xl mb-8 leading-relaxed font-medium">
@@ -220,7 +221,7 @@ export default function Home() {
                   <Link href="/assessment" className="w-full sm:w-auto">
                     <Button 
                       size="lg" 
-                      className="w-full sm:px-12 h-14 md:h-16 rounded-full neon-shadow text-base md:text-lg font-bold group"
+                      className={cn("w-full sm:px-12 h-14 md:h-16 rounded-full text-base md:text-lg font-bold group", difficultyStyle.selectedArrow, difficultyStyle.accentShadow)}
                     >
                       Test starten <ArrowRight className="ml-2 w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-2 transition-transform" />
                     </Button>
@@ -237,7 +238,7 @@ export default function Home() {
                 
                 {!isAssessmentUnlocked && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
-                    <Sparkles className="w-4 h-4 text-primary" />
+                    <Sparkles className={cn("w-4 h-4", difficultyStyle.accentText)} />
                     Noch {Math.max(2 - completedVisibleModules.length, 0)} Module bis zum Unlock
                   </div>
                 )}
