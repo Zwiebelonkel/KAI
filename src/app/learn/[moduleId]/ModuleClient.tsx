@@ -352,6 +352,7 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
                   definition={item.definition}
                   onOpen={() => handleTermOpen(item.term)}
                   isRead={readTerms.includes(item.term)}
+                  difficultyColors={difficultyColors}
                 />
               ))}
             </div>
@@ -364,6 +365,7 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
           <Quiz
             questions={module.quiz}
             onComplete={handleQuizComplete}
+            difficultyColors={difficultyColors}
           />
         </section>
 
@@ -372,7 +374,7 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
             <Button
               size="lg"
               onClick={() => router.push('/')}
-              className="w-full sm:w-auto rounded-full px-12 md:px-16 h-14 md:h-16 text-lg md:text-xl font-bold neon-shadow group"
+              className={cn("w-full sm:w-auto rounded-full px-12 md:px-16 h-14 md:h-16 text-lg md:text-xl font-bold group", difficultyColors.selectedArrow, difficultyColors.accentShadow)}
             >
               Lektion abschließen <ArrowLeft className="ml-4 w-5 h-5 md:w-6 md:h-6 rotate-180 group-hover:translate-x-2 transition-transform" />
             </Button>

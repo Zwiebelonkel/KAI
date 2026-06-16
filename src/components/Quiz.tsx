@@ -2,6 +2,7 @@
 "use client"
 
 import * as React from "react"
+import { DifficultyColors } from "@/lib/difficulty-colors"
 import { QuizQuestion } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, XCircle, ArrowRight, RefreshCcw, Trophy, Image as ImageIcon } from "lucide-react"
@@ -11,9 +12,10 @@ import { cn } from "@/lib/utils"
 interface QuizProps {
   questions: QuizQuestion[];
   onComplete: (score: number) => void;
+  difficultyColors?: DifficultyColors;
 }
 
-export function Quiz({ questions, onComplete }: QuizProps) {
+export function Quiz({ questions, onComplete, difficultyColors }: QuizProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [selectedOption, setSelectedOption] = React.useState<number | null>(null);
   const [showFeedback, setShowFeedback] = React.useState(false);
@@ -68,11 +70,11 @@ export function Quiz({ questions, onComplete }: QuizProps) {
   }
 
   return (
-    <div className="glass-card p-6 md:p-8 rounded-2xl md:rounded-3xl border-primary/20 animate-fade-in shadow-xl">
+    <div className={cn("glass-card p-6 md:p-8 rounded-2xl md:rounded-3xl animate-fade-in shadow-xl border", difficultyColors?.accentBorder || "border-primary/20")}>
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6 md:mb-8">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-[10px] md:text-sm font-bold text-primary uppercase tracking-widest">Wissenscheck</span>
+          <div className={cn("w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse", difficultyColors?.accentText.replace("text-", "bg-") || "bg-primary")} />
+          <span className={cn("text-[10px] md:text-sm font-bold uppercase tracking-widest", difficultyColors?.accentText || "text-primary")}>Wissenscheck</span>
         </div>
         <span className="text-[10px] md:text-sm font-medium text-muted-foreground">Frage {currentIndex + 1} von {questions.length}</span>
       </div>
@@ -103,7 +105,9 @@ export function Quiz({ questions, onComplete }: QuizProps) {
               optionStyles = "opacity-50 grayscale";
             }
           } else if (selectedOption === idx) {
-            optionStyles = "border-primary bg-primary/10 text-primary ring-2 ring-primary/20";
+            optionStyles = difficultyColors
+              ? cn(difficultyColors.accentBorder, difficultyColors.accentBg, difficultyColors.accentText, "ring-2", difficultyColors.accentShadow)
+              : "border-primary bg-primary/10 text-primary ring-2 ring-primary/20";
           }
 
           return (
@@ -125,10 +129,10 @@ export function Quiz({ questions, onComplete }: QuizProps) {
       </div>
 
       {showFeedback && (
-        <div className="mb-8 md:mb-10 p-5 md:p-6 bg-primary/5 border border-primary/10 rounded-xl md:rounded-2xl animate-fade-in">
+        <div className={cn("mb-8 md:mb-10 p-5 md:p-6 border rounded-xl md:rounded-2xl animate-fade-in", difficultyColors?.accentBg || "bg-primary/5", difficultyColors?.accentBorder || "border-primary/10")}>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-            <p className="text-[10px] md:text-sm text-primary font-bold uppercase tracking-wider">Auflösung & Erklärung</p>
+            <div className={cn("w-1.5 h-1.5 rounded-full", difficultyColors?.accentText.replace("text-", "bg-") || "bg-primary")} />
+            <p className={cn("text-[10px] md:text-sm font-bold uppercase tracking-wider", difficultyColors?.accentText || "text-primary")}>Auflösung & Erklärung</p>
           </div>
           <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{currentQuestion.explanation}</p>
         </div>
@@ -139,12 +143,12 @@ export function Quiz({ questions, onComplete }: QuizProps) {
           <Button 
             onClick={handleCheckAnswer} 
             disabled={selectedOption === null}
-            className="w-full sm:w-auto neon-shadow px-12 h-12 rounded-full text-base md:text-lg"
+            className={cn("w-full sm:w-auto px-12 h-12 rounded-full text-base md:text-lg", difficultyColors?.selectedArrow || "neon-shadow")}
           >
             Antwort prüfen
           </Button>
         ) : (
-          <Button onClick={handleNext} className="w-full sm:w-auto gap-2 px-12 h-12 rounded-full text-base md:text-lg group">
+          <Button onClick={handleNext} className={cn("w-full sm:w-auto gap-2 px-12 h-12 rounded-full text-base md:text-lg group", difficultyColors?.selectedArrow || "")}>
             {currentIndex + 1 < questions.length ? "Nächste Frage" : "Lektion beenden"} 
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>

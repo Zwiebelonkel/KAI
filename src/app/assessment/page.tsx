@@ -26,6 +26,8 @@ import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Certificate } from "@/components/Certificate"
 import { UserProgress } from "@/lib/types"
+import { getDifficultyColors } from "@/lib/difficulty-colors"
+import { cn } from "@/lib/utils"
 import { kaiApi } from "@/lib/api-service"
 import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
@@ -140,6 +142,7 @@ export default function AssessmentPage() {
   const [results, setResults] = React.useState<boolean[]>([]);
   const [isExporting, setIsExporting] = React.useState(false);
   const [recipientName, setRecipientName] = React.useState<string | null>(null);
+  const [difficultyLevel, setDifficultyLevel] = React.useState<UserProgress["level"]>(null);
   const certificateRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -152,8 +155,15 @@ export default function AssessmentPage() {
       kaiApi.getProgress()
         .then((progress: UserProgress) => {
           setRecipientName(progress.displayName || progress.email || storedUser?.displayName || storedUser?.email || null);
+          setDifficultyLevel(progress.level);
         })
         .catch((error) => console.warn('KAI API progress load failed:', error));
+    } else {
+      const saved = localStorage.getItem('kai_user_progress');
+      if (saved) {
+        const progress: UserProgress = JSON.parse(saved);
+        setDifficultyLevel(progress.level);
+      }
     }
   }, []);
 
@@ -198,6 +208,7 @@ export default function AssessmentPage() {
   };
 
   const misImg = PlaceHolderImages.find(i => i.id === 'misinformation-hero') || PlaceHolderImages[0];
+  const difficultyColors = difficultyLevel ? getDifficultyColors(difficultyLevel) : null;
 
   if (isDone) {
     const score = results.filter(r => r).length;
@@ -255,7 +266,7 @@ export default function AssessmentPage() {
       <Header />
       <main className="container mx-auto px-4 max-w-4xl">
         <div className="mb-8 md:mb-12 text-center animate-fade-in">
-          <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mx-auto mb-4 border border-primary/30">
+          <div className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mx-auto mb-4 border", difficultyColors?.accentBg || "bg-primary/20", difficultyColors?.accentText || "text-primary", difficultyColors?.accentBorder || "border-primary/30")}>
             KI-Kompetenz Check: Praxis-Szenarien
           </div>
           <h1 className="text-3xl md:text-5xl font-black mb-2 md:mb-4 tracking-tighter">Echt oder Fake?</h1>
@@ -263,7 +274,7 @@ export default function AssessmentPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start mb-12">
-          <div className="relative aspect-square rounded-2xl md:rounded-3xl overflow-hidden glass-card animate-fade-in delay-100 border-primary/20">
+          <div className={cn("relative aspect-square rounded-2xl md:rounded-3xl overflow-hidden glass-card animate-fade-in delay-100 border", difficultyColors?.accentBorder || "border-primary/20")}>
              <Image 
                 src={misImg.imageUrl} 
                 alt={misImg.description} 
@@ -271,8 +282,8 @@ export default function AssessmentPage() {
                 className="object-cover opacity-10"
              />
              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8 text-center">
-                <div className="mb-4 md:mb-6 bg-primary/20 p-3 md:p-4 rounded-xl md:rounded-2xl">
-                  {c.icon}
+                <div className={cn("mb-4 md:mb-6 p-3 md:p-4 rounded-xl md:rounded-2xl", difficultyColors?.accentBg || "bg-primary/20")}>
+                  {React.cloneElement(c.icon, { className: cn("w-8 h-8 md:w-12 md:h-12", difficultyColors?.accentText || "text-primary") })}
                 </div>
                 <h4 className="text-lg md:text-2xl font-bold mb-3 md:mb-4">{c.title}</h4>
                 <p className="text-base md:text-xl font-medium leading-relaxed italic text-white/90">{c.description}</p>
@@ -287,7 +298,7 @@ export default function AssessmentPage() {
                   key={idx}
                   onClick={() => handleSelect(idx)}
                   className={`w-full p-4 md:p-6 rounded-xl md:rounded-2xl border-2 text-left transition-all duration-300 flex justify-between items-center
-                    ${selected === idx ? (idx === c.correct ? 'border-green-500 bg-green-500/10' : 'border-red-500 bg-red-500/10') : 'border-white/10 bg-white/5 hover:border-primary/50'}
+                    ${selected === idx ? (idx === c.correct ? 'border-green-500 bg-green-500/10' : 'border-red-500 bg-red-500/10') : difficultyColors ? cn('border-white/10 bg-white/5', difficultyColors.cardBorder) : 'border-white/10 bg-white/5 hover:border-primary/50'}
                   `}
                 >
                   <span className="font-bold text-base md:text-xl">{opt}</span>
@@ -300,8 +311,8 @@ export default function AssessmentPage() {
             {selected !== null && (
               <div className="p-6 md:p-8 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl animate-fade-in shadow-2xl">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest">Die Auflösung</p>
+                  <div className={cn("w-2 h-2 rounded-full animate-pulse", difficultyColors?.accentText.replace("text-", "bg-") || "bg-primary")} />
+                  <p className={cn("text-[10px] md:text-xs font-bold uppercase tracking-widest", difficultyColors?.accentText || "text-primary")}>Die Auflösung</p>
                 </div>
                 <p className="text-sm md:text-lg text-muted-foreground leading-relaxed font-medium mb-6">{c.explanation}</p>
                 
@@ -313,7 +324,7 @@ export default function AssessmentPage() {
                   ))}
                 </div>
 
-                <Button onClick={next} className="mt-8 w-full gap-2 rounded-xl h-14 md:h-16 font-bold text-lg neon-shadow">
+                <Button onClick={next} className={cn("mt-8 w-full gap-2 rounded-xl h-14 md:h-16 font-bold text-lg", difficultyColors?.selectedArrow || "neon-shadow", difficultyColors?.accentShadow)}>
                   {currentCase + 1 < cases.length ? "Nächstes Szenario" : "Ergebnis anzeigen"} <ArrowRight className="w-5 h-5" />
                 </Button>
               </div>
