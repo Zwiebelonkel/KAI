@@ -39,6 +39,7 @@ export interface AdminModuleInput {
   glossary: LearningModule["glossary"];
   quiz: LearningModule["quiz"];
   lessonImages?: LearningModule["lessonImages"];
+  videoLink?: string;
   isPublished: boolean;
 }
 
