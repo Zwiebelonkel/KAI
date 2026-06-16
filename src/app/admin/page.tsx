@@ -13,7 +13,7 @@ import { AdminLearningModule, AdminModuleCompletionPoint, AdminModuleInput, kaiA
 import { getModuleIcon, getModuleIconOption, moduleIconOptions } from "@/lib/module-icons"
 import { toast } from "@/hooks/use-toast"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { AlertCircle, BarChart3, Database, Eye, EyeOff, ImageIcon, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2, Upload } from "lucide-react"
+import { AlertCircle, BarChart3, Database, Eye, EyeOff, ImageIcon, Loader2, LockKeyhole, Pencil, Plus, RefreshCw, Save, Trash2, Upload, Video } from "lucide-react"
 
 const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || "1234";
 const ADMIN_PIN_SESSION_KEY = "kai_admin_pin_unlocked";
@@ -74,6 +74,7 @@ const EMPTY_MODULE: AdminModuleInput = {
   minLevel: "Einsteiger",
   glossary: [{ term: "", definition: "" }],
   lessonImages: [],
+  videoLink: "",
   quiz: [
     {
       id: "q1-neues-modul",
@@ -96,6 +97,7 @@ function toAdminInput(module: AdminLearningModule): AdminModuleInput {
     minLevel: module.minLevel,
     glossary: module.glossary.length ? module.glossary : [{ term: "", definition: "" }],
     lessonImages: module.lessonImages || [],
+    videoLink: module.videoLink || "",
     quiz: module.quiz.length ? module.quiz : EMPTY_MODULE.quiz,
     isPublished: module.isPublished ?? true,
   };
@@ -108,6 +110,7 @@ function sanitizeModule(module: AdminModuleInput): AdminModuleInput {
     title: module.title.trim(),
     description: module.description.trim(),
     content: module.content.trim(),
+    videoLink: module.videoLink?.trim() || undefined,
     lessonImages: (module.lessonImages || [])
       .filter((image) => image.imageUrl.trim())
       .map((image, index) => ({
@@ -577,6 +580,24 @@ export default function AdminPage() {
                 <Label htmlFor="content">Lerninhalt</Label>
                 <Textarea id="content" value={form.content} onChange={(e) => updateForm("content", e.target.value)} className="min-h-[140px]" placeholder="Der Haupttext des Moduls..." />
               </div>
+
+              <section className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-xl bg-primary/10 p-2 text-primary">
+                    <Video className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg">Video der Lektion</h3>
+                    <p className="text-xs text-muted-foreground">Optional: YouTube-, YouTube-Shorts-, youtu.be- oder Vimeo-Link. Wenn ein Link gesetzt ist, ersetzt er das Placeholder-Video oben in der Lektion.</p>
+                  </div>
+                </div>
+                <Input
+                  id="videoLink"
+                  value={form.videoLink || ""}
+                  onChange={(event) => updateForm("videoLink", event.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+              </section>
 
               <section className="space-y-4">
                 <div className="flex items-center justify-between gap-3">

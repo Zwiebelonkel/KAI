@@ -40,6 +40,7 @@ export interface LearningModule {
   glossary: GlossaryItem[];
   quiz: QuizQuestion[];
   lessonImages?: LessonImage[];
+  videoLink?: string;
   minLevel: DifficultyLevel;
 }
 
