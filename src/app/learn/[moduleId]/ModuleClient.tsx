@@ -30,6 +30,36 @@ function splitLessonContent(content: string): string[] {
     .filter(Boolean);
 }
 
+
+function getEmbeddableVideoUrl(videoLink?: string): string | null {
+  if (!videoLink) return null;
+
+  try {
+    const url = new URL(videoLink);
+    if (!/^https?:$/.test(url.protocol)) return null;
+
+    const host = url.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") {
+      const videoId = url.pathname.split("/").filter(Boolean)[0];
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+
+    if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+      const videoId = url.searchParams.get("v") || url.pathname.split("/").filter(Boolean).at(-1);
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+
+    if (host === "vimeo.com" || host === "player.vimeo.com") {
+      const videoId = url.pathname.split("/").filter(Boolean).at(-1);
+      return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
+    }
+
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 function renderLessonBlock(block: string, index: number, accentText: string) {
   if (/^#{1,3}\s+/.test(block)) {
     return (
@@ -81,7 +111,7 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
         duration: 0.8,
         ease: "power3.out"
       });
-      
+
       gsap.from(".hero-visual", {
         scale: 1.1,
         opacity: 0,
@@ -182,17 +212,18 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
   };
 
   React.useEffect(() => {
-    const totalItems = module.glossary.length + 1; 
+    const totalItems = module.glossary.length + 1;
     const itemsDone = readTerms.length + (isQuizDone ? 1 : 0);
     setProgress(Math.round((itemsDone / totalItems) * 100));
   }, [readTerms, isQuizDone, module.glossary.length]);
 
   const imageId = `${module.id.split('-')[0]}-hero`;
-  const heroImage = PlaceHolderImages.find(img => img.id === imageId) || 
+  const heroImage = PlaceHolderImages.find(img => img.id === imageId) ||
                     PlaceHolderImages[0];
   const difficultyColors = getDifficultyColors(module.minLevel);
   const lessonImages = module.lessonImages || [];
   const lessonContentBlocks = splitLessonContent(module.content);
+  const embeddableVideoUrl = getEmbeddableVideoUrl(module.videoLink);
   const renderLessonImages = (placement: NonNullable<LearningModule["lessonImages"]>[number]["placement"]) => {
     const images = lessonImages.filter((image) => image.placement === placement && image.imageUrl);
     if (!images.length) return null;
@@ -214,7 +245,7 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
     <div className="min-h-screen pt-20 pb-20 overflow-x-hidden" ref={containerRef}>
       <div className="mesh-bg" />
       <Header />
-      
+
       {showLootbox && <LootboxOverlay onClose={handleLootboxClose} />}
 
       <div className="fixed bottom-0 left-0 right-0 z-[60] h-1.5 bg-background">
@@ -222,9 +253,9 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
       </div>
 
       <main className="container mx-auto px-4 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => router.push('/')} 
+        <Button
+          variant="ghost"
+          onClick={() => router.push('/')}
           className="mb-8 md:mb-12 hover:bg-white/5 -ml-2 md:-ml-4 rounded-full group animate-reveal text-sm"
         >
           <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Zurück zum Lernpfad
@@ -245,18 +276,30 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
         {renderLessonImages("after-description")}
 
         <div className={cn("relative aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden mb-12 md:mb-16 glass-card group hero-visual shadow-2xl border", difficultyColors.accentBorder, difficultyColors.accentShadow)}>
-          <Image 
-            src={heroImage.imageUrl} 
-            alt={heroImage.description} 
-            fill
-            className="object-cover transition-transform duration-[3s] group-hover:scale-110"
-            data-ai-hint={heroImage.imageHint}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent flex items-center justify-center">
-            <Button size="icon" className={cn("w-16 h-16 md:w-24 md:h-24 rounded-full hover:scale-110 transition-transform border-0", difficultyColors.selectedArrow, difficultyColors.accentShadow)}>
-              <PlayCircle className="w-8 h-8 md:w-12 md:h-12 fill-white" />
-            </Button>
-          </div>
+          {embeddableVideoUrl ? (
+            <iframe
+              src={embeddableVideoUrl}
+              title={`Video zu ${module.title}`}
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : (
+            <>
+              <Image
+                src={heroImage.imageUrl}
+                alt={heroImage.description}
+                fill
+                className="object-cover transition-transform duration-[3s] group-hover:scale-110"
+                data-ai-hint={heroImage.imageHint}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent flex items-center justify-center">
+                <Button size="icon" className={cn("w-16 h-16 md:w-24 md:h-24 rounded-full hover:scale-110 transition-transform border-0", difficultyColors.selectedArrow, difficultyColors.accentShadow)}>
+                  <PlayCircle className="w-8 h-8 md:w-12 md:h-12 fill-white" />
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
         <article className="max-w-none mb-16 md:mb-24 space-y-12 md:space-y-20">
@@ -292,21 +335,21 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
 
           {renderLessonImages("after-content")}
           {renderLessonImages("before-glossary")}
-          
+
           <div className="animate-reveal">
             <h2 className="text-2xl md:text-3xl font-black mb-6 md:mb-8 flex items-center gap-3 md:gap-4 tracking-tight">
               <div className={cn("p-2 md:p-3 rounded-xl md:rounded-2xl border", difficultyColors.accentBg, difficultyColors.accentBorder, difficultyColors.accentText, difficultyColors.accentShadow)}>
-                <BookOpen className="w-6 h-6 md:w-8 md:h-8" /> 
+                <BookOpen className="w-6 h-6 md:w-8 md:h-8" />
               </div>
               Glossar: Fachbegriffe
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 font-medium">Öffne die Begriffe, um sie tiefgreifend zu verstehen.</p>
             <div className="grid gap-3 md:gap-4">
               {module.glossary.map((item, idx) => (
-                <GlossaryCard 
-                  key={idx} 
-                  term={item.term} 
-                  definition={item.definition} 
+                <GlossaryCard
+                  key={idx}
+                  term={item.term}
+                  definition={item.definition}
                   onOpen={() => handleTermOpen(item.term)}
                   isRead={readTerms.includes(item.term)}
                 />
@@ -318,17 +361,17 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
         {renderLessonImages("before-quiz")}
 
         <section id="quiz" className="animate-reveal scroll-mt-24">
-          <Quiz 
-            questions={module.quiz} 
-            onComplete={handleQuizComplete} 
+          <Quiz
+            questions={module.quiz}
+            onComplete={handleQuizComplete}
           />
         </section>
 
         {isQuizDone && (
           <div className="mt-12 md:mt-20 text-center animate-in fade-in slide-in-from-bottom-5 duration-700">
-            <Button 
-              size="lg" 
-              onClick={() => router.push('/')} 
+            <Button
+              size="lg"
+              onClick={() => router.push('/')}
               className="w-full sm:w-auto rounded-full px-12 md:px-16 h-14 md:h-16 text-lg md:text-xl font-bold neon-shadow group"
             >
               Lektion abschließen <ArrowLeft className="ml-4 w-5 h-5 md:w-6 md:h-6 rotate-180 group-hover:translate-x-2 transition-transform" />
