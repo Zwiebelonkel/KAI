@@ -9,6 +9,7 @@ import { modules as fallbackModules } from "@/lib/course-data"
 import { AuthUser, kaiApi } from "@/lib/api-service"
 import { AuthScreen } from "@/components/AuthScreen"
 import { ModuleCard } from "@/components/ModuleCard"
+import { getDifficultyStyle } from "@/lib/difficulty-styles"
 import { Button } from "@/components/ui/button"
 import { Trophy, ShieldAlert, Award, ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
@@ -129,7 +130,11 @@ export default function Home() {
     return <LevelSelector onSelect={handleLevelSelect} />;
   }
 
-  const isAssessmentUnlocked = progress.completedModules.length >= 2;
+  const visibleModules = modules.filter((module) => module.minLevel === progress.level);
+  const completedVisibleModules = visibleModules.filter((module) => progress.completedModules.includes(module.id));
+  const visibleProgress = Math.round((completedVisibleModules.length / Math.max(visibleModules.length, 1)) * 100);
+  const difficultyStyle = getDifficultyStyle(progress.level);
+  const isAssessmentUnlocked = completedVisibleModules.length >= 2;
 
   return (
     <div className="min-h-screen pt-20 pb-12 overflow-x-hidden" ref={containerRef}>
@@ -141,7 +146,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 mb-8 md:mb-12">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full bg-primary/15 text-primary text-[10px] font-black uppercase tracking-[0.2em] border border-primary/20">
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border ${difficultyStyle.badge}`}>
                   {progress.level}
                 </span>
                 <button 
@@ -167,16 +172,16 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Fortschritt</div>
-                  <div className="text-2xl md:text-3xl font-black text-white">{Math.round((progress.completedModules.length / modules.length) * 100)}<span className="text-secondary">%</span></div>
+                  <div className="text-2xl md:text-3xl font-black text-white">{visibleProgress}<span className="text-secondary">%</span></div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-            {modules.map((module) => {
+            {visibleModules.map((module) => {
               const isCompleted = progress.completedModules.includes(module.id);
-              const isLocked = progress.level === 'Einsteiger' && module.minLevel === 'Fortgeschritten';
+              const isLocked = false;
               const moduleProgress = isCompleted ? 100 : 0;
               
               return (
@@ -233,7 +238,7 @@ export default function Home() {
                 {!isAssessmentUnlocked && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
                     <Sparkles className="w-4 h-4 text-primary" />
-                    Noch {2 - progress.completedModules.length} Module bis zum Unlock
+                    Noch {Math.max(2 - completedVisibleModules.length, 0)} Module bis zum Unlock
                   </div>
                 )}
               </div>

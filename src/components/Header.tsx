@@ -12,6 +12,7 @@ import { ProgressBar } from "./ProgressBar"
 import { getRarityCardClass, getRarityColor } from "@/lib/lootbox-data"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { getDifficultyStyle } from "@/lib/difficulty-styles"
 
 export function Header() {
   const [progress, setProgress] = React.useState<UserProgress | null>(null);
@@ -38,6 +39,11 @@ export function Header() {
     const basePath = window.location.pathname.startsWith('/KAI') ? '/KAI' : '';
     window.location.href = `${basePath}/`;
   };
+
+  const visibleModules = progress?.level ? modules.filter((module) => module.minLevel === progress.level) : modules;
+  const completedVisibleModules = progress ? visibleModules.filter((module) => progress.completedModules.includes(module.id)) : [];
+  const headerProgress = Math.round((completedVisibleModules.length / Math.max(visibleModules.length, 1)) * 100);
+  const difficultyStyle = progress?.level ? getDifficultyStyle(progress.level) : null;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-white/5 h-16">
@@ -80,13 +86,17 @@ export function Header() {
                     )}
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs md:text-sm font-medium text-muted-foreground">Aktuelles Level</span>
-                      <span className="text-primary font-bold text-sm">{progress.level}</span>
+                      <span className={cn("font-bold text-sm", difficultyStyle?.action)}>{progress.level}</span>
                     </div>
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-xs md:text-sm font-medium text-muted-foreground">Module</span>
-                      <span className="font-bold text-sm">{progress.completedModules.length} / {modules.length}</span>
+                      <span className="font-bold text-sm">{completedVisibleModules.length} / {visibleModules.length}</span>
                     </div>
-                    <ProgressBar value={Math.round((progress.completedModules.length / Math.max(modules.length, 1)) * 100)} />
+                    <ProgressBar
+                      value={headerProgress}
+                      className={difficultyStyle?.progressTrack}
+                      indicatorClassName={difficultyStyle?.progress}
+                    />
                   </div>
 
                   <div>
@@ -115,7 +125,7 @@ export function Header() {
                   <div>
                     <h4 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-secondary mb-4">Lektionen</h4>
                     <div className="space-y-2 md:space-y-3">
-                      {modules.map((m) => {
+                      {visibleModules.map((m) => {
                         const isDone = progress.completedModules.includes(m.id);
                         return (
                           <div key={m.id} className={`flex items-center justify-between p-3 rounded-lg md:rounded-xl border transition-colors ${isDone ? 'bg-secondary/10 border-secondary/30' : 'bg-white/5 border-white/5 opacity-50'}`}>
@@ -141,7 +151,7 @@ export function Header() {
                     </Button>
                   )}
 
-                  {progress.completedModules.length >= modules.length && (
+                  {completedVisibleModules.length >= visibleModules.length && visibleModules.length > 0 && (
                     <div className="p-4 rounded-xl md:rounded-2xl bg-gradient-to-br from-secondary/20 to-primary/20 border border-white/10 text-center">
                       <p className="text-xs md:text-sm font-semibold mb-2">Alle Grundlagen gemeistert!</p>
                       <Link href="/assessment">
