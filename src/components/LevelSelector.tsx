@@ -64,24 +64,33 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
       title: 'Einsteiger', 
       desc: 'Keine Vorkenntnisse nötig. Wir starten bei Null.', 
       icon: <Sparkles className="w-6 h-6" />,
-      color: "text-blue-300",
-      glow: "from-blue-500/30 to-cyan-400/10"
+      color: "text-emerald-300",
+      glow: "from-emerald-500/30 to-teal-400/10",
+      selectedBorder: "border-emerald-400/70",
+      selectedShadow: "shadow-[0_0_55px_rgba(52,211,153,0.26)]",
+      selectedArrow: "border-emerald-400 bg-emerald-400 text-slate-950"
     },
     { 
       id: 'Basics' as DifficultyLevel, 
       title: 'Grundlagen', 
       desc: 'Du weißt was Daten sind und willst tiefer graben.', 
       icon: <BarChart3 className="w-6 h-6" />,
-      color: "text-violet-300",
-      glow: "from-violet-500/30 to-fuchsia-400/10"
+      color: "text-sky-300",
+      glow: "from-sky-500/30 to-cyan-400/10",
+      selectedBorder: "border-sky-400/70",
+      selectedShadow: "shadow-[0_0_55px_rgba(56,189,248,0.26)]",
+      selectedArrow: "border-sky-400 bg-sky-400 text-slate-950"
     },
     { 
       id: 'Fortgeschritten' as DifficultyLevel, 
       title: 'Experte', 
       desc: 'Mathe & Logik schrecken dich nicht ab. Deep Dive.', 
       icon: <Binary className="w-6 h-6" />,
-      color: "text-emerald-300",
-      glow: "from-emerald-500/30 to-teal-400/10"
+      color: "text-fuchsia-300",
+      glow: "from-fuchsia-500/30 to-purple-400/10",
+      selectedBorder: "border-fuchsia-400/70",
+      selectedShadow: "shadow-[0_0_55px_rgba(232,121,249,0.26)]",
+      selectedArrow: "border-fuchsia-400 bg-fuchsia-400 text-slate-950"
     }
   ];
 
@@ -198,7 +207,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
               data-anime="glass-card"
               className={cn(
                 "liquid-glass group relative overflow-hidden rounded-[2rem] p-6 text-left transition-all duration-300 hover:-translate-y-2 hover:border-white/25",
-                selected === opt.id ? "border-primary/70 shadow-[0_0_55px_rgba(77,150,255,0.26)]" : "border-white/12"
+                selected === opt.id ? cn(opt.selectedBorder, opt.selectedShadow) : "border-white/12"
               )}
             >
               <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100", opt.glow)} />
@@ -211,7 +220,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
                 <p className="text-sm font-medium leading-relaxed text-white/58">{opt.desc}</p>
                 <div className="mt-6 flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase tracking-[0.22em] text-white/40">Level wählen</span>
-                  <span className={cn("flex h-9 w-9 items-center justify-center rounded-full border transition-all", selected === opt.id ? "border-primary bg-primary text-white" : "border-white/15 bg-white/[0.04] text-white/50 group-hover:text-white")}>
+                  <span className={cn("flex h-9 w-9 items-center justify-center rounded-full border transition-all", selected === opt.id ? opt.selectedArrow : "border-white/15 bg-white/[0.04] text-white/50 group-hover:text-white")}>
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
