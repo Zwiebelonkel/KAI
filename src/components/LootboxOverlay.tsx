@@ -43,16 +43,16 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="max-w-2xl w-full p-8 text-center">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/90 p-3 backdrop-blur-xl animate-in fade-in duration-200 sm:p-6">
+      <div className="w-full max-w-2xl p-3 text-center sm:p-8">
         {state === 'idle' && (
           <div className="animate-fade-in">
             <div className="w-32 h-32 bg-primary/20 rounded-3xl mx-auto mb-8 flex items-center justify-center border-2 border-primary/50 neon-shadow animate-bounce">
               <Gift className="w-16 h-16 text-primary" />
             </div>
             <h2 className="text-3xl font-bold mb-4">Modul-Belohnung!</h2>
-            <p className="text-muted-foreground mb-8">Du hast eine KAI-Lootbox mit 3 Items verdient. Was wird wohl drin sein?</p>
-            <Button onClick={handleOpen} size="lg" className="rounded-full px-12 h-14 text-lg neon-shadow">
+            <p className="mb-4 text-sm text-muted-foreground sm:mb-8 sm:text-base">Du hast eine KAI-Lootbox mit 3 Items verdient. Was wird wohl drin sein?</p>
+            <Button onClick={handleOpen} size="lg" className="h-12 rounded-full px-8 text-base neon-shadow sm:h-14 sm:px-12 sm:text-lg">
               Box öffnen
             </Button>
           </div>
@@ -71,7 +71,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full animate-pulse" />
             <div className="relative animate-in zoom-in duration-300">
-              <div className="mb-5 flex justify-center">
+              <div className="mb-3 flex justify-center sm:mb-5">
                 <Button
                   type="button"
                   variant="outline"
@@ -85,7 +85,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
               </div>
 
               {showChances && (
-                <div className="mx-auto mb-6 max-w-sm rounded-2xl border border-white/10 bg-black/40 p-4 text-left shadow-2xl backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="mx-auto mb-4 max-w-sm rounded-2xl border border-white/10 bg-black/40 p-3 text-left shadow-2xl backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-200 sm:mb-6 sm:p-4">
                   <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Seltenheits-Chancen pro Item</p>
                   <div className="space-y-2">
                     {RARITY_ORDER.map((rarity) => (
@@ -98,12 +98,12 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
                 </div>
               )}
 
-              <h2 className="text-4xl font-black mb-3">Deine Lootbox-Items</h2>
-              <p className="text-muted-foreground mb-8">
+              <h2 className="mb-2 text-2xl font-black sm:mb-3 sm:text-4xl">Deine Lootbox-Items</h2>
+              <p className="mb-4 text-sm text-muted-foreground sm:mb-8 sm:text-base">
                 {revealedCount < trophies.length ? 'Die Items kommen nacheinander aus der Box...' : 'Alle 3 Items wurden zu deiner Sammlung hinzugefügt!'}
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+              <div className="mb-5 grid grid-cols-3 gap-2 sm:mb-10 sm:gap-4">
                 {trophies.map((trophy, index) => {
                   const isRevealed = index < revealedCount;
 
@@ -111,7 +111,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
                     <div
                       key={trophy.id}
                       className={cn(
-                        "rounded-3xl border p-5 shadow-2xl backdrop-blur-sm transition-all duration-200",
+                        "rounded-2xl border p-2 shadow-2xl backdrop-blur-sm transition-all duration-200 sm:rounded-3xl sm:p-5",
                         isRevealed
                           ? "scale-100 border-white/10 bg-white/5 opacity-100 animate-in zoom-in slide-in-from-bottom-8"
                           : "scale-90 border-white/5 bg-white/[0.02] opacity-30"
@@ -119,18 +119,18 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
                     >
                       {isRevealed ? (
                         <>
-                          <div className="text-6xl sm:text-7xl mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">
+                          <div className="mb-2 text-4xl drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] sm:mb-4 sm:text-7xl">
                             {trophy.emoji}
                           </div>
-                          <div className={cn("text-xs font-bold uppercase tracking-[0.2em] mb-2", getRarityColor(trophy.rarity))}>
+                          <div className={cn("mb-1 text-[10px] font-bold uppercase tracking-[0.12em] sm:mb-2 sm:text-xs sm:tracking-[0.2em]", getRarityColor(trophy.rarity))}>
                             {trophy.rarity}
                           </div>
-                          <h3 className="text-lg sm:text-xl font-black leading-tight">{trophy.name}</h3>
+                          <h3 className="text-xs font-black leading-tight sm:text-xl">{trophy.name}</h3>
                         </>
                       ) : (
-                        <div className="flex min-h-[154px] flex-col items-center justify-center text-white/40">
-                          <Gift className="mb-3 h-12 w-12 animate-pulse" />
-                          <span className="text-xs font-bold uppercase tracking-[0.2em]">Item {index + 1}</span>
+                        <div className="flex min-h-[96px] flex-col items-center justify-center text-white/40 sm:min-h-[154px]">
+                          <Gift className="mb-2 h-8 w-8 animate-pulse sm:mb-3 sm:h-12 sm:w-12" />
+                          <span className="text-[10px] font-bold uppercase tracking-[0.12em] sm:text-xs sm:tracking-[0.2em]">Item {index + 1}</span>
                         </div>
                       )}
                     </div>
@@ -138,7 +138,7 @@ export function LootboxOverlay({ onClose }: LootboxOverlayProps) {
                 })}
               </div>
 
-              <Button onClick={handleFinish} disabled={revealedCount < trophies.length} size="lg" className="rounded-full px-12 h-14 text-lg neon-shadow">
+              <Button onClick={handleFinish} disabled={revealedCount < trophies.length} size="lg" className="h-12 rounded-full px-8 text-base neon-shadow sm:h-14 sm:px-12 sm:text-lg">
                 Items einsammeln <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
