@@ -118,20 +118,6 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
               </p>
             </div>
 
-            <div data-anime="intro" className="flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <Button
-                size="lg"
-                disabled={!selected}
-                onClick={() => selected && onSelect(selected)}
-                className="group h-14 w-full rounded-full px-9 text-base font-black shadow-[0_0_50px_rgba(77,150,255,0.35)] sm:w-auto"
-              >
-                Lernpfad starten <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1.5" />
-              </Button>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">
-                Level anklicken und direkt starten
-              </p>
-            </div>
-
             <div data-anime="intro" className="grid gap-3 sm:grid-cols-3">
               {stats.map((stat) => (
                 <div key={stat.label} className="liquid-glass rounded-3xl p-4 text-left">
