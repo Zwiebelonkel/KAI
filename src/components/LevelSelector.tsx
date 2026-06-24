@@ -83,6 +83,11 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
     }
   ];
 
+  const handleOptionSelect = (level: DifficultyLevel) => {
+    setSelected(level);
+    onSelect(level);
+  };
+
   const stats = [
     { label: "Micro-Lektionen", value: "5+", icon: <BrainCircuit className="h-4 w-4" /> },
     { label: "Lootbox Rewards", value: "31", icon: <Trophy className="h-4 w-4" /> },
@@ -123,7 +128,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
                 Lernpfad starten <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1.5" />
               </Button>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">
-                Erst Level wählen
+                Level anklicken und direkt starten
               </p>
             </div>
 
@@ -192,7 +197,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
           {options.map((opt) => (
             <button
               key={opt.id}
-              onClick={() => setSelected(opt.id)}
+              onClick={() => handleOptionSelect(opt.id)}
               data-anime="glass-card"
               className={cn(
                 "liquid-glass group relative overflow-hidden rounded-[2rem] p-6 text-left transition-all duration-300 hover:-translate-y-2 hover:border-white/25",
