@@ -18,7 +18,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { createEmptyProgress, kaiApi } from "@/lib/api-service";
+import {
+  createEmptyProgress,
+  kaiApi,
+  updateLevelProgress,
+} from "@/lib/api-service";
 import { ProgressBar } from "@/components/ProgressBar";
 import { getDifficultyColors } from "@/lib/difficulty-colors";
 import { LootboxOverlay } from "@/components/LootboxOverlay";
@@ -231,13 +235,18 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
     };
 
     const wasAlreadyDone = currentProgress.completedModules.includes(module.id);
-    const nextProgress: UserProgress = {
-      ...currentProgress,
+    const nextLevelProgress = {
       completedModules: wasAlreadyDone
         ? currentProgress.completedModules
         : [...currentProgress.completedModules, module.id],
       quizScores: { ...currentProgress.quizScores, [module.id]: score },
+      totalProgress: currentProgress.totalProgress,
     };
+    const nextProgress: UserProgress = updateLevelProgress(
+      currentProgress,
+      module.minLevel,
+      nextLevelProgress,
+    );
 
     if (!wasAlreadyDone) {
       setShowLootbox(true);

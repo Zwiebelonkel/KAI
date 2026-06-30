@@ -6,7 +6,13 @@ import { Header } from "@/components/Header"
 import { LevelSelector } from "@/components/LevelSelector"
 import { DifficultyLevel, UserProgress } from "@/lib/types"
 import { modules as fallbackModules } from "@/lib/course-data"
-import { AuthUser, createEmptyProgress, kaiApi } from "@/lib/api-service"
+import {
+  AuthUser,
+  applyLevelProgress,
+  clearActiveLevel,
+  createEmptyProgress,
+  kaiApi,
+} from "@/lib/api-service"
 import { AuthScreen } from "@/components/AuthScreen"
 import { ModuleCard } from "@/components/ModuleCard"
 import { getDifficultyStyle } from "@/lib/difficulty-styles"
@@ -95,7 +101,7 @@ export default function Home() {
   }, [progress.level]);
 
   const handleLevelSelect = (level: DifficultyLevel) => {
-    const nextProgress = { ...progress, level };
+    const nextProgress = applyLevelProgress(progress, level);
     setProgress(nextProgress);
     if (user?.isGuest) {
       kaiApi.saveGuestProgress(nextProgress);
@@ -107,14 +113,14 @@ export default function Home() {
   };
 
   const resetLevel = () => {
-    const reset: UserProgress = createEmptyProgress();
-    setProgress(reset);
+    const nextProgress: UserProgress = clearActiveLevel(progress);
+    setProgress(nextProgress);
     if (user?.isGuest) {
-      kaiApi.saveGuestProgress(reset);
+      kaiApi.saveGuestProgress(nextProgress);
     } else if (kaiApi.isConfigured) {
-      kaiApi.saveProgress(reset).catch((error) => console.warn('KAI API progress save failed:', error));
+      kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress save failed:', error));
     } else {
-      localStorage.removeItem('kai_user_progress');
+      localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
     }
   };
 

@@ -44,6 +44,12 @@ export interface LearningModule {
   minLevel: DifficultyLevel;
 }
 
+export interface LevelProgress {
+  completedModules: string[];
+  quizScores: Record<string, number>;
+  totalProgress: number;
+}
+
 export interface UserProgress {
   displayName?: string | null;
   email?: string | null;
@@ -52,4 +58,5 @@ export interface UserProgress {
   quizScores: Record<string, number>;
   totalProgress: number;
   trophies: Trophy[];
+  levelProgress: Partial<Record<DifficultyLevel, LevelProgress>>;
 }

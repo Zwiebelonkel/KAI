@@ -1,4 +1,4 @@
-import { DifficultyLevel, LearningModule, UserProgress } from "./types";
+import { DifficultyLevel, LearningModule, LevelProgress, UserProgress } from "./types";
 
 const DEFAULT_API_BASE_URL = "https://kaiserver-b3dd.onrender.com";
 const API_BASE_URL = (
@@ -54,13 +54,81 @@ function browserSessionStorage() {
   return typeof window === "undefined" ? null : window.sessionStorage;
 }
 
-export const createEmptyProgress = (): UserProgress => ({
-  level: null,
+export const createEmptyLevelProgress = (): LevelProgress => ({
   completedModules: [],
   quizScores: {},
   totalProgress: 0,
-  trophies: [],
 });
+
+export const createEmptyProgress = (): UserProgress => ({
+  level: null,
+  ...createEmptyLevelProgress(),
+  trophies: [],
+  levelProgress: {},
+});
+
+export function snapshotActiveLevelProgress(
+  progress: UserProgress,
+): UserProgress["levelProgress"] {
+  if (!progress.level) return progress.levelProgress || {};
+
+  return {
+    ...(progress.levelProgress || {}),
+    [progress.level]: {
+      completedModules: progress.completedModules,
+      quizScores: progress.quizScores,
+      totalProgress: progress.totalProgress,
+    },
+  };
+}
+
+export function applyLevelProgress(
+  progress: UserProgress,
+  level: DifficultyLevel,
+): UserProgress {
+  const levelProgress = snapshotActiveLevelProgress(progress);
+  const selectedProgress = levelProgress[level] || createEmptyLevelProgress();
+
+  return {
+    ...progress,
+    ...selectedProgress,
+    level,
+    levelProgress,
+  };
+}
+
+export function clearActiveLevel(progress: UserProgress): UserProgress {
+  return {
+    ...progress,
+    ...createEmptyLevelProgress(),
+    level: null,
+    levelProgress: snapshotActiveLevelProgress(progress),
+  };
+}
+
+export function updateLevelProgress(
+  progress: UserProgress,
+  level: DifficultyLevel,
+  levelProgress: LevelProgress,
+): UserProgress {
+  return {
+    ...progress,
+    ...levelProgress,
+    level,
+    levelProgress: {
+      ...(progress.levelProgress || {}),
+      [level]: levelProgress,
+    },
+  };
+}
+
+export function normalizeProgress(progress: Partial<UserProgress> | null | undefined): UserProgress {
+  return {
+    ...createEmptyProgress(),
+    ...(progress || {}),
+    levelProgress: progress?.levelProgress || {},
+  };
+}
 
 function getAnonymousCompletionId(): string {
   const storage = browserStorage();
@@ -244,7 +312,7 @@ export const kaiApi = {
     const raw = browserSessionStorage()?.getItem(GUEST_PROGRESS_KEY);
     if (!raw) return createEmptyProgress();
     try {
-      return JSON.parse(raw) as UserProgress;
+      return normalizeProgress(JSON.parse(raw) as UserProgress);
     } catch {
       return createEmptyProgress();
     }
@@ -265,7 +333,7 @@ export const kaiApi = {
   },
 
   async getProgress(): Promise<UserProgress> {
-    return request<UserProgress>("/me/progress");
+    return normalizeProgress(await request<UserProgress>("/me/progress"));
   },
 
   async saveProgress(progress: UserProgress): Promise<UserProgress> {
