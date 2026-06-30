@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BrainCircuit, LogIn, UserPlus, Loader2, AlertCircle } from "lucide-react"
+import { BrainCircuit, LogIn, UserPlus, Loader2, AlertCircle, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,6 +21,11 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const isRegister = mode === "register";
+
+  const handleGuestLogin = () => {
+    setError(null);
+    onAuthenticated(kaiApi.startGuestSession());
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,7 +56,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
             </div>
             <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">Willkommen bei KAI</h1>
             <p className="text-sm text-muted-foreground font-medium">
-              Melde dich an, damit dein Lernstand sicher in der Datenbank gespeichert wird.
+              Melde dich an, damit dein Lernstand sicher in der Datenbank gespeichert wird – oder starte als Gast nur für diese Session.
             </p>
           </div>
 
@@ -100,6 +105,22 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
               {isSubmitting ? "Bitte warten..." : isRegister ? "Account erstellen" : "Einloggen"}
             </Button>
           </form>
+
+          <div className="mt-6 border-t border-white/10 pt-6">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={handleGuestLogin}
+              className="w-full h-14 rounded-full font-bold gap-2 border-white/10"
+            >
+              <UserRound className="w-5 h-5" />
+              Als Gast starten
+            </Button>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              Dein Gast-Fortschritt bleibt nur lokal in diesem Browser-Tab. Nach einer neuen Session beginnst du wieder von vorn.
+            </p>
+          </div>
         </div>
       </div>
     </div>

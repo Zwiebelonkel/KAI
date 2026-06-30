@@ -7,11 +7,14 @@ const API_BASE_URL = (
 const TOKEN_KEY = "kai_auth_token";
 const USER_KEY = "kai_auth_user";
 const ANONYMOUS_ID_KEY = "kai_anonymous_completion_id";
+const GUEST_USER_KEY = "kai_guest_user";
+const GUEST_PROGRESS_KEY = "kai_guest_progress";
 
 export interface AuthUser {
   id: string;
   email: string;
   displayName?: string | null;
+  isGuest?: boolean;
 }
 
 export interface AuthResponse {
@@ -46,6 +49,18 @@ export interface AdminModuleInput {
 function browserStorage() {
   return typeof window === "undefined" ? null : window.localStorage;
 }
+
+function browserSessionStorage() {
+  return typeof window === "undefined" ? null : window.sessionStorage;
+}
+
+export const createEmptyProgress = (): UserProgress => ({
+  level: null,
+  completedModules: [],
+  quizScores: {},
+  totalProgress: 0,
+  trophies: [],
+});
 
 function getAnonymousCompletionId(): string {
   const storage = browserStorage();
@@ -179,8 +194,23 @@ export const kaiApi = {
   storeAuth(auth: AuthResponse) {
     const storage = browserStorage();
     if (!storage) return;
+    browserSessionStorage()?.removeItem(GUEST_USER_KEY);
+    browserSessionStorage()?.removeItem(GUEST_PROGRESS_KEY);
     storage.setItem(TOKEN_KEY, auth.token);
     storage.setItem(USER_KEY, JSON.stringify(auth.user));
+  },
+
+  startGuestSession(): AuthUser {
+    const guestUser: AuthUser = {
+      id: `guest-${crypto.randomUUID()}`,
+      email: "",
+      displayName: "Gast",
+      isGuest: true,
+    };
+    const sessionStorage = browserSessionStorage();
+    sessionStorage?.setItem(GUEST_USER_KEY, JSON.stringify(guestUser));
+    sessionStorage?.setItem(GUEST_PROGRESS_KEY, JSON.stringify(createEmptyProgress()));
+    return guestUser;
   },
 
   getToken(): string | null {
@@ -188,6 +218,15 @@ export const kaiApi = {
   },
 
   getStoredUser(): AuthUser | null {
+    const guestRaw = browserSessionStorage()?.getItem(GUEST_USER_KEY);
+    if (guestRaw) {
+      try {
+        return JSON.parse(guestRaw) as AuthUser;
+      } catch {
+        browserSessionStorage()?.removeItem(GUEST_USER_KEY);
+      }
+    }
+
     const raw = browserStorage()?.getItem(USER_KEY);
     if (!raw) return null;
     try {
@@ -197,10 +236,32 @@ export const kaiApi = {
     }
   },
 
+  isGuestSession(): boolean {
+    return Boolean(browserSessionStorage()?.getItem(GUEST_USER_KEY));
+  },
+
+  getGuestProgress(): UserProgress {
+    const raw = browserSessionStorage()?.getItem(GUEST_PROGRESS_KEY);
+    if (!raw) return createEmptyProgress();
+    try {
+      return JSON.parse(raw) as UserProgress;
+    } catch {
+      return createEmptyProgress();
+    }
+  },
+
+  saveGuestProgress(progress: UserProgress): UserProgress {
+    browserSessionStorage()?.setItem(GUEST_PROGRESS_KEY, JSON.stringify(progress));
+    return progress;
+  },
+
   logout() {
     const storage = browserStorage();
     storage?.removeItem(TOKEN_KEY);
     storage?.removeItem(USER_KEY);
+    const sessionStorage = browserSessionStorage();
+    sessionStorage?.removeItem(GUEST_USER_KEY);
+    sessionStorage?.removeItem(GUEST_PROGRESS_KEY);
   },
 
   async getProgress(): Promise<UserProgress> {
