@@ -6,6 +6,7 @@ import { BrainCircuit, UserCircle, Trophy, BookOpen, CheckCircle2, Sparkles } fr
 import Link from "next/link"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 import { UserProgress } from "@/lib/types"
+import { loadGuestProgress } from "@/lib/progress-storage"
 import { modules } from "@/lib/course-data"
 import { ProgressBar } from "./ProgressBar"
 import { getRarityColor } from "@/lib/lootbox-data"
@@ -15,10 +16,7 @@ export function Header() {
   const [progress, setProgress] = React.useState<UserProgress | null>(null);
 
   const loadProgress = () => {
-    const saved = localStorage.getItem('kai_user_progress');
-    if (saved) {
-      setProgress(JSON.parse(saved));
-    }
+    setProgress(loadGuestProgress());
   };
 
   return (
@@ -36,7 +34,7 @@ export function Header() {
             <SheetTrigger asChild>
               <button className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full border border-white/10 bg-white/5">
                 <UserCircle className="w-4 h-4" />
-                <span><span className="hidden xs:inline">Mein </span>Lernstand</span>
+                <span><span className="hidden xs:inline">Gast-</span>Lernstand</span>
               </button>
             </SheetTrigger>
             <SheetContent className="glass-card border-l border-white/10 w-full sm:max-w-md overflow-y-auto pt-10">
@@ -45,7 +43,7 @@ export function Header() {
                   <Trophy className="text-secondary w-5 h-5 md:w-6 md:h-6" /> Dein Fortschritt
                 </SheetTitle>
                 <SheetDescription>
-                  Hier siehst du, wie weit du auf deinem Weg zum KI-Experten bist.
+                  Hier siehst du deinen Gast-Fortschritt. Er wird nur für diese Browser-Sitzung gespeichert.
                 </SheetDescription>
               </SheetHeader>
 

@@ -5,6 +5,7 @@ import * as React from "react"
 import { Header } from "@/components/Header"
 import { LevelSelector } from "@/components/LevelSelector"
 import { DifficultyLevel, UserProgress } from "@/lib/types"
+import { clearGuestProgress, clearLegacyProgress, createEmptyProgress, loadGuestProgress, saveGuestProgress } from "@/lib/progress-storage"
 import { modules } from "@/lib/course-data"
 import { ModuleCard } from "@/components/ModuleCard"
 import { Button } from "@/components/ui/button"
@@ -14,21 +15,16 @@ import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 
 export default function Home() {
-  const [progress, setProgress] = React.useState<UserProgress>({
-    level: null,
-    completedModules: [],
-    quizScores: {},
-    totalProgress: 0,
-    trophies: []
-  });
+  const [progress, setProgress] = React.useState<UserProgress>(createEmptyProgress);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // Load progress from localStorage on mount
+  // Load guest progress from sessionStorage on mount. Guest progress is cleared by the browser when a new session starts.
   React.useEffect(() => {
-    const saved = localStorage.getItem('kai_user_progress');
+    clearLegacyProgress();
+    const saved = loadGuestProgress();
     if (saved) {
-      setProgress(JSON.parse(saved));
+      setProgress(saved);
     }
   }, []);
 
@@ -58,19 +54,13 @@ export default function Home() {
   const handleLevelSelect = (level: DifficultyLevel) => {
     const nextProgress = { ...progress, level };
     setProgress(nextProgress);
-    localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
+    saveGuestProgress(nextProgress);
   };
 
   const resetLevel = () => {
-    const reset: UserProgress = {
-      level: null,
-      completedModules: [],
-      quizScores: {},
-      totalProgress: 0,
-      trophies: []
-    };
+    const reset = createEmptyProgress();
     setProgress(reset);
-    localStorage.removeItem('kai_user_progress');
+    clearGuestProgress();
   };
 
   if (!progress.level) {

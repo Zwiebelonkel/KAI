@@ -5,6 +5,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/Header"
 import { LearningModule, UserProgress, Trophy } from "@/lib/types"
+import { createEmptyProgress, loadGuestProgress, saveGuestProgress } from "@/lib/progress-storage"
 import { GlossaryCard } from "@/components/GlossaryCard"
 import { Quiz } from "@/components/Quiz"
 import { Button } from "@/components/ui/button"
@@ -47,14 +48,11 @@ export function ModuleClient({ module }: ModuleClientProps) {
     }
   }, { scope: containerRef });
 
-  // Load state from localStorage on mount
+  // Load state from sessionStorage on mount so guest progress resets in a new browser session.
   React.useEffect(() => {
-    const saved = localStorage.getItem('kai_user_progress');
-    if (saved) {
-      const parsed: UserProgress = JSON.parse(saved);
-      if (parsed.completedModules.includes(module.id)) {
-        setIsQuizDone(true);
-      }
+    const saved = loadGuestProgress();
+    if (saved?.completedModules.includes(module.id)) {
+      setIsQuizDone(true);
     }
   }, [module.id]);
 
@@ -65,10 +63,10 @@ export function ModuleClient({ module }: ModuleClientProps) {
   };
 
   const handleQuizComplete = (score: number) => {
-    const saved = localStorage.getItem('kai_user_progress');
-    let currentProgress: UserProgress = saved 
-      ? JSON.parse(saved) 
-      : { level: 'Einsteiger', completedModules: [], quizScores: {}, totalProgress: 0, trophies: [] };
+    const currentProgress: UserProgress = loadGuestProgress() ?? {
+      ...createEmptyProgress(),
+      level: 'Einsteiger',
+    };
     
     const wasAlreadyDone = currentProgress.completedModules.includes(module.id);
     
@@ -78,17 +76,16 @@ export function ModuleClient({ module }: ModuleClientProps) {
     }
     
     currentProgress.quizScores[module.id] = score;
-    localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
+    saveGuestProgress(currentProgress);
     setIsQuizDone(true);
   };
 
   const handleLootboxClose = (trophy: Trophy) => {
-    const saved = localStorage.getItem('kai_user_progress');
-    if (saved) {
-      const currentProgress: UserProgress = JSON.parse(saved);
+    const currentProgress = loadGuestProgress();
+    if (currentProgress) {
       if (!currentProgress.trophies) currentProgress.trophies = [];
       currentProgress.trophies.push(trophy);
-      localStorage.setItem('kai_user_progress', JSON.stringify(currentProgress));
+      saveGuestProgress(currentProgress);
     }
     setShowLootbox(false);
   };
