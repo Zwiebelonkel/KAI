@@ -43,7 +43,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
       <div className="text-center mb-8 md:mb-12">
         <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tighter">Willkommen bei KAI</h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto font-medium">
-          Wähle dein Wissensniveau aus, damit wir deinen Lernpfad maßschneidern können.
+          Starte als Gast und wähle dein Wissensniveau aus. Dein Fortschritt bleibt nur in dieser Browser-Sitzung erhalten.
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
           onClick={() => selected && onSelect(selected)}
           className="w-full sm:w-auto px-12 h-14 text-lg rounded-full neon-shadow font-bold"
         >
-          Lernpfad starten <ArrowRight className="ml-2 w-5 h-5" />
+          Als Gast starten <ArrowRight className="ml-2 w-5 h-5" />
         </Button>
       </div>
     </div>
