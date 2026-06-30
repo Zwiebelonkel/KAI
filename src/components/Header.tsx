@@ -20,6 +20,16 @@ export function Header() {
   const [modules, setModules] = React.useState<LearningModule[]>(fallbackModules);
 
   const loadProgress = () => {
+    if (kaiApi.isGuestSession()) {
+      setProgress(kaiApi.getGuestProgress());
+      if (kaiApi.isConfigured) {
+        kaiApi.listModules()
+          .then(setModules)
+          .catch(() => setModules(fallbackModules));
+      }
+      return;
+    }
+
     if (kaiApi.isConfigured && kaiApi.getToken()) {
       kaiApi.getProgress()
         .then(setProgress)
@@ -145,9 +155,9 @@ export function Header() {
                   </div>
 
 
-                  {kaiApi.isConfigured && (
+                  {(kaiApi.isConfigured || kaiApi.isGuestSession()) && (
                     <Button variant="outline" onClick={handleLogout} className="w-full rounded-full gap-2 border-white/10">
-                      <LogOut className="w-4 h-4" /> Ausloggen
+                      <LogOut className="w-4 h-4" /> {kaiApi.isGuestSession() ? "Gast-Session beenden" : "Ausloggen"}
                     </Button>
                   )}
 
