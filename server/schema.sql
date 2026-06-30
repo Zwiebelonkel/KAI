@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS user_progress (
   completed_modules_json TEXT NOT NULL DEFAULT '[]',
   quiz_scores_json TEXT NOT NULL DEFAULT '{}',
   total_progress INTEGER NOT NULL DEFAULT 0,
+  level_progress_json TEXT NOT NULL DEFAULT '{}',
   trophies_json TEXT NOT NULL DEFAULT '[]',
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
