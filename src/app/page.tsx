@@ -6,7 +6,7 @@ import { Header } from "@/components/Header"
 import { LevelSelector } from "@/components/LevelSelector"
 import { DifficultyLevel, UserProgress } from "@/lib/types"
 import { modules as fallbackModules } from "@/lib/course-data"
-import { AuthUser, kaiApi } from "@/lib/api-service"
+import { AuthUser, createEmptyProgress, kaiApi } from "@/lib/api-service"
 import { AuthScreen } from "@/components/AuthScreen"
 import { ModuleCard } from "@/components/ModuleCard"
 import { getDifficultyStyle } from "@/lib/difficulty-styles"
@@ -19,13 +19,7 @@ import { useGSAP } from "@gsap/react"
 
 export default function Home() {
   const [modules, setModules] = React.useState(fallbackModules);
-  const [progress, setProgress] = React.useState<UserProgress>({
-    level: null,
-    completedModules: [],
-    quizScores: {},
-    totalProgress: 0,
-    trophies: []
-  });
+  const [progress, setProgress] = React.useState<UserProgress>(() => createEmptyProgress());
   const [user, setUser] = React.useState<AuthUser | null>(null);
   const [isBooting, setIsBooting] = React.useState(true);
 
@@ -41,10 +35,17 @@ export default function Home() {
         return;
       }
 
-      setUser(kaiApi.getStoredUser());
+      const storedUser = kaiApi.getStoredUser();
+      setUser(storedUser);
       kaiApi.listModules()
         .then(setModules)
         .catch((error) => console.warn('KAI API modules fallback:', error));
+
+      if (storedUser?.isGuest) {
+        setProgress(kaiApi.getGuestProgress());
+        setIsBooting(false);
+        return;
+      }
 
       if (!kaiApi.getToken()) {
         setIsBooting(false);
@@ -67,7 +68,7 @@ export default function Home() {
 
   const loadRemoteProgress = async (authUser: AuthUser) => {
     setUser(authUser);
-    setProgress(await kaiApi.getProgress());
+    setProgress(authUser.isGuest ? kaiApi.getGuestProgress() : await kaiApi.getProgress());
   };
 
   useGSAP(() => {
@@ -96,26 +97,24 @@ export default function Home() {
   const handleLevelSelect = (level: DifficultyLevel) => {
     const nextProgress = { ...progress, level };
     setProgress(nextProgress);
-    if (kaiApi.isConfigured) {
+    if (user?.isGuest) {
+      kaiApi.saveGuestProgress(nextProgress);
+    } else if (kaiApi.isConfigured) {
       kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress save failed:', error));
     } else {
       localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
     }
   };
 
-  const resetLevel = () => {
-    const reset: UserProgress = {
-      level: null,
-      completedModules: [],
-      quizScores: {},
-      totalProgress: 0,
-      trophies: []
-    };
-    setProgress(reset);
-    if (kaiApi.isConfigured) {
-      kaiApi.saveProgress(reset).catch((error) => console.warn('KAI API progress save failed:', error));
+  const showLevelSelector = () => {
+    const nextProgress: UserProgress = { ...progress, level: null };
+    setProgress(nextProgress);
+    if (user?.isGuest) {
+      kaiApi.saveGuestProgress(nextProgress);
+    } else if (kaiApi.isConfigured) {
+      kaiApi.saveProgress(nextProgress).catch((error) => console.warn('KAI API progress save failed:', error));
     } else {
-      localStorage.removeItem('kai_user_progress');
+      localStorage.setItem('kai_user_progress', JSON.stringify(nextProgress));
     }
   };
 
@@ -151,7 +150,7 @@ export default function Home() {
                   {progress.level}
                 </span>
                 <button 
-                  onClick={resetLevel} 
+                  onClick={showLevelSelector}
                   className={cn("text-xs text-muted-foreground transition-colors border-b border-transparent", difficultyStyle.accentBorder, difficultyStyle.accentText)}
                 >
                   Level ändern

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { kaiApi } from "@/lib/api-service";
+import { createEmptyProgress, kaiApi } from "@/lib/api-service";
 import { ProgressBar } from "@/components/ProgressBar";
 import { getDifficultyColors } from "@/lib/difficulty-colors";
 import { LootboxOverlay } from "@/components/LootboxOverlay";
@@ -178,6 +178,13 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
   // Load user progress from the API when configured; keep local fallback for dev.
   React.useEffect(() => {
     const loadProgress = async () => {
+      if (kaiApi.isGuestSession()) {
+        const guestProgress = kaiApi.getGuestProgress();
+        setUserProgress(guestProgress);
+        setIsQuizDone(guestProgress.completedModules.includes(module.id));
+        return;
+      }
+
       if (kaiApi.isConfigured && kaiApi.getToken()) {
         const remoteProgress = await kaiApi.getProgress();
         setUserProgress(remoteProgress);
@@ -206,7 +213,9 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
 
   const persistProgress = (nextProgress: UserProgress) => {
     setUserProgress(nextProgress);
-    if (kaiApi.isConfigured && kaiApi.getToken()) {
+    if (kaiApi.isGuestSession()) {
+      kaiApi.saveGuestProgress(nextProgress);
+    } else if (kaiApi.isConfigured && kaiApi.getToken()) {
       kaiApi
         .saveProgress(nextProgress)
         .catch((error) => console.warn("KAI API progress save failed:", error));
@@ -217,11 +226,8 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
 
   const handleQuizComplete = (score: number) => {
     const currentProgress: UserProgress = userProgress || {
-      level: "Einsteiger",
-      completedModules: [],
-      quizScores: {},
-      totalProgress: 0,
-      trophies: [],
+      ...createEmptyProgress(),
+      level: module.minLevel,
     };
 
     const wasAlreadyDone = currentProgress.completedModules.includes(module.id);
@@ -235,11 +241,13 @@ export function ModuleClient({ module: initialModule }: ModuleClientProps) {
 
     if (!wasAlreadyDone) {
       setShowLootbox(true);
-      kaiApi
-        .submitModuleCompletion(module.id)
-        .catch((error) =>
-          console.warn("KAI API completion submit failed:", error),
-        );
+      if (kaiApi.getToken()) {
+        kaiApi
+          .submitModuleCompletion(module.id)
+          .catch((error) =>
+            console.warn("KAI API completion submit failed:", error),
+          );
+      }
     }
     persistProgress(nextProgress);
     setIsQuizDone(true);

@@ -151,7 +151,11 @@ export default function AssessmentPage() {
       setRecipientName(storedUser.displayName || storedUser.email);
     }
 
-    if (kaiApi.isConfigured && kaiApi.getToken()) {
+    if (storedUser?.isGuest) {
+      const progress = kaiApi.getGuestProgress();
+      setRecipientName(progress.displayName || storedUser.displayName || null);
+      setDifficultyLevel(progress.level);
+    } else if (kaiApi.isConfigured && kaiApi.getToken()) {
       kaiApi.getProgress()
         .then((progress: UserProgress) => {
           setRecipientName(progress.displayName || progress.email || storedUser?.displayName || storedUser?.email || null);
