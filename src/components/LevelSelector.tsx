@@ -114,7 +114,7 @@ export function LevelSelector({ onSelect }: LevelSelectorProps) {
                 <span className="liquid-gradient-text">Wie Magie.</span>
               </h1>
               <p data-anime="intro" className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-white/68 md:text-xl lg:mx-0">
-                KAI verwandelt künstliche Intelligenz in einen interaktiven Lernpfad mit Quizzen, Belohnungen, Zertifikat und einem Design, das sich wie flüssiges Glas anfühlt.
+                KAI verwandelt künstliche Intelligenz in einen interaktiven Lernpfad mit Quizzen, Belohnungen und Zertifikat.
               </p>
             </div>
 
